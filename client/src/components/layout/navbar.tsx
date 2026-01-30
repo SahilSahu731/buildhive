@@ -84,10 +84,9 @@ export function Navbar() {
         </div>
 
         {/* Center: Search Bar (Only visible on App Pages like Reddit) */}
-        {isAppPage && (
+        {/* {isAppPage && (
             <div className="hidden md:flex flex-1 max-w-xl mx-auto px-4">
                 <div className="relative w-full">
-                    {/* Placeholder Search - Functional one can be in page content or global */}
                      <div className="flex items-centerh-10 w-full rounded-full border border-input bg-muted/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                         <span className="text-muted-foreground flex items-center gap-2 w-full">
                             <span className="opacity-50">🔍</span> 
@@ -97,6 +96,7 @@ export function Navbar() {
                 </div>
             </div>
         )}
+        */}
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3 shrink-0">
