@@ -15,6 +15,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ProjectCardSkeleton } from "@/components/loading/project-card-skeleton"
 
 export default function ProjectsPage() {
   const searchParams = useSearchParams()
@@ -91,7 +92,7 @@ export default function ProjectsPage() {
         {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-[320px] rounded-xl border bg-card/30 animate-pulse" />
+                <ProjectCardSkeleton key={i} />
             ))}
             </div>
         ) : projects.length > 0 ? (
