@@ -25,7 +25,7 @@ export const getMyProfile = async (req: AuthRequest, res: Response) => {
         githubUsername: true,
         githubUrl: true,
         createdAt: true,
-        // Include counts or related data if needed
+        role: true,
       }
     });
 

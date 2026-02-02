@@ -37,6 +37,7 @@ model User {
   projects       Project[]
   interests      Interest[]
   codeReviews    CodeReview[]
+  feedbacks      Feedback[]
   
   @@index([email])
   @@index([githubId])
@@ -47,6 +48,34 @@ enum Plan {
   FREE
   PREMIUM
   PRO
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String?
+  type        String   // BUG, FEEDBACK, FEATURE_REQUEST
+  title       String
+  description String   @db.Text
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  rating      Int?
+  createdAt   DateTime @default(now())
+  
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  type        String   @default("BANNER") // BANNER, POPUP
+  message     String   @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([isActive])
 }
 
 model Project {

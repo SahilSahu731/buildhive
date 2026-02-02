@@ -213,3 +213,157 @@ export const getMyProjects = async () => {
     if (!response.ok) return [];
     return response.json();
 }
+
+// Admin API
+export const getAdminStats = async () => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/admin/stats`, {
+        method: "GET",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to fetch admin stats");
+    return response.json();
+};
+
+export const getAllUsers = async (page = 1, limit = 10) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/admin/users?page=${page}&limit=${limit}`, {
+        method: "GET",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to fetch users");
+    return response.json();
+};
+
+export const updateUserAsAdmin = async (id: string, data: { role?: string, plan?: string }) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/admin/users/${id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error("Failed to update user");
+    return response.json();
+};
+
+export const deleteUserAsAdmin = async (id: string) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/admin/users/${id}`, {
+        method: "DELETE",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to delete user");
+    return response.json();
+};
+
+export const getAllProjectsAsAdmin = async (page = 1, limit = 10) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/admin/projects?page=${page}&limit=${limit}`, {
+        method: "GET",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to fetch projects");
+    return response.json();
+};
+
+export const deleteProjectAsAdmin = async (id: string) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/admin/projects/${id}`, {
+        method: "DELETE",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to delete project");
+    return response.json();
+};
+
+// Feedback API
+export const submitFeedback = async (data: { type: string, title: string, description: string, rating?: number }) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/feedback`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error("Failed to submit feedback");
+    return response.json();
+}
+
+export const getAllFeedbacks = async (page = 1, limit = 50) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/feedback?page=${page}&limit=${limit}`, {
+        method: "GET",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to fetch feedbacks");
+    return response.json();
+}
+
+export const updateFeedbackStatus = async (id: string, status: string) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/feedback/${id}/status`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ status })
+    });
+    if (!response.ok) throw new Error("Failed to update status");
+    return response.json();
+}
+
+export const deleteFeedback = async (id: string) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/feedback/${id}`, {
+        method: "DELETE",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to delete feedback");
+    return response.json();
+}
+
+// Announcements API
+export const getActiveAnnouncements = async () => {
+    const response = await fetch(`${API_URL}/announcements/active`);
+    if (!response.ok) return [];
+    return response.json();
+}
+
+export const getAllAnnouncements = async () => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/announcements`, {
+        method: "GET",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to fetch announcements");
+    return response.json();
+}
+
+export const createAnnouncement = async (data: any) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/announcements`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error("Failed to create announcement");
+    return response.json();
+}
+
+export const updateAnnouncement = async (id: string, data: any) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/announcements/${id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error("Failed to update announcement");
+    return response.json();
+}
+
+export const deleteAnnouncement = async (id: string) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/announcements/${id}`, {
+        method: "DELETE",
+        headers
+    });
+    if (!response.ok) throw new Error("Failed to delete announcement");
+    return response.json();
+}

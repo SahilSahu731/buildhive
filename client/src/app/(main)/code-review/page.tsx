@@ -82,6 +82,8 @@ export default function CodeReviewPage() {
       const reviewResult = await codeReviewAPI.create({ code, language })
       setResult(reviewResult)
       toast.success("Code reviewed successfully!")
+      // Trigger feedback popup
+      setTimeout(() => window.dispatchEvent(new Event('open-feedback')), 1500)
       // Refresh limits
       getSubscriptionStatus().then(setSubscription);
     } catch (error: any) {

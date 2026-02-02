@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { getMyProfile } from "@/lib/api"
 import Link from "next/link"
-import { CreditCard, History, LayoutDashboard, LogOut, Settings, User } from "lucide-react"
+import { CreditCard, History, LayoutDashboard, LogOut, Settings, User, ShieldAlert } from "lucide-react"
 
 export function UserNav() {
   const router = useRouter()
@@ -65,6 +65,14 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {user?.role === 'admin' && (
+             <Link href="/admin">
+                <DropdownMenuItem className="text-destructive focus:text-destructive">
+                   <ShieldAlert className="mr-2 h-4 w-4" />
+                   Admin Panel
+                </DropdownMenuItem>
+             </Link>
+          )}
           <Link href="/dashboard">
             <DropdownMenuItem>
                 <LayoutDashboard className="mr-2 h-4 w-4" />
