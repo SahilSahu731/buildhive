@@ -9,6 +9,7 @@ passport.use(new GitHubStrategy({
     clientSecret: process.env.GITHUB_CLIENT_SECRET || 'GITHUB_CLIENT_SECRET_PLACEHOLDER',
     callbackURL: process.env.GITHUB_CALLBACK_URL,
     scope: ['user:email'],
+    proxy: true,
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { id, username, profileUrl, photos, emails, _json } = profile;
@@ -71,6 +72,7 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID_PLACEHOLDER',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET_PLACEHOLDER',
     callbackURL: process.env.GOOGLE_CALLBACK_URL || `${SERVER_URL}/api/auth/google/callback`,
+    proxy: true,
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { id, displayName, emails, photos } = profile;

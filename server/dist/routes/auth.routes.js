@@ -15,7 +15,8 @@ router.get('/github/callback', passport.authenticate('github', { failureRedirect
         email: user.email,
     });
     // Redirect to frontend with token
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    // Redirect to frontend with token
+    const clientUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000';
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
 });
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -27,7 +28,8 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
         email: user.email,
     });
     // Redirect to frontend with token
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    // Redirect to frontend with token
+    const clientUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000';
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
 });
 export default router;
