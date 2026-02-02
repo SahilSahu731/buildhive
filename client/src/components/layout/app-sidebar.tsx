@@ -107,7 +107,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-border/40 p-4">
          <p className="text-xs text-muted-foreground text-center">
-            © 2026 BuildHive
+            © 2026 buildershub
          </p>
       </SidebarFooter>
     </Sidebar>

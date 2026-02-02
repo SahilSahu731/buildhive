@@ -9,7 +9,7 @@ export function FeaturesSection() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Everything required to ship high-quality code</h2>
-                    <p className="mt-4 text-lg text-muted-foreground">BuildHive is more than just a review tool. It's a complete ecosystem.</p>
+                    <p className="mt-4 text-lg text-muted-foreground">buildershub is more than just a review tool. It's a complete ecosystem.</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

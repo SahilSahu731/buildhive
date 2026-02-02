@@ -59,10 +59,10 @@ export function Navbar() {
         <div className="flex items-center gap-8 shrink-0">
             <Link href="/" className="flex items-center gap-2">
             <div className="relative h-8 w-8">
-                <Image src="/logo.png" alt="BuildHive" fill className="object-contain" />
+                <Image src="/logo.png" alt="buildershub" fill className="object-contain" />
             </div>
             <span className={cn("font-bold text-xl tracking-tight hidden md:inline-block", isAppPage && "lg:inline-block")}>
-                BuildHive
+                buildershub
             </span>
             </Link>
 
@@ -146,9 +146,9 @@ export function Navbar() {
                          <div className="p-6 border-b">
                              <div className="flex items-center gap-3">
                                  <div className="relative h-8 w-8">
-                                    <Image src="/logo.png" alt="BuildHive" fill className="object-contain" />
+                                    <Image src="/logo.png" alt="buildershub" fill className="object-contain" />
                                 </div>
-                                <span className="font-bold text-xl tracking-tight">BuildHive</span>
+                                <span className="font-bold text-xl tracking-tight">buildershub</span>
                              </div>
                          </div>
                          

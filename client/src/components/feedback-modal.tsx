@@ -64,7 +64,7 @@ export function FeedbackModal() {
         <DialogHeader>
           <DialogTitle>Share your thoughts</DialogTitle>
           <DialogDescription>
-            Help us improve BuildHive. Report a bug, suggest a feature, or just say hi.
+            Help us improve buildershub. Report a bug, suggest a feature, or just say hi.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">

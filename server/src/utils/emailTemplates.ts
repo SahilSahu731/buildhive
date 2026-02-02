@@ -3,7 +3,7 @@ export const getOTPTemplate = (otp: string): string => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #ffffff;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #333; font-size: 24px; margin: 10px 0;">BuildHive</h1>
+        <h1 style="color: #333; font-size: 24px; margin: 10px 0;">buildershub</h1>
         <p style="color: #666; font-size: 16px;">Secure Login Verification</p>
       </div>
       
@@ -18,7 +18,7 @@ export const getOTPTemplate = (otp: string): string => {
       </p>
       
       <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center; color: #999; font-size: 12px;">
-        &copy; ${new Date().getFullYear()} BuildHive. All rights reserved.
+        &copy; ${new Date().getFullYear()} buildershub. All rights reserved.
       </div>
     </div>
   `;

@@ -32,7 +32,7 @@ export function HeroSection() {
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-muted/50 font-medium text-xs mb-8 text-muted-foreground transition-colors hover:bg-muted">
                             <Badge variant="secondary" className="rounded-full px-2 py-0.5 h-5 text-[10px] bg-primary/10 text-primary border-0">NEW</Badge>
-                            <span>The ultimate platform for builders</span>
+                            <span>buildershub V1.0 is now live!</span>
                             <ArrowRight className="h-3 w-3" />
                         </div>
 
@@ -101,7 +101,7 @@ export function HeroSection() {
                             {/* Code Content */}
                             <div className="p-6 font-mono text-sm bg-background/50">
                                   <div className="space-y-1">
-                                      <div className="flex gap-4"><span className="text-muted-foreground w-4 select-none">1</span> <span><span className="text-purple-500">import</span> {'{'} scan {'}'} <span className="text-purple-500">from</span> <span className="text-green-500">'@buildhive/ai'</span>;</span></div>
+                                      <div className="flex gap-4"><span className="text-muted-foreground w-4 select-none">1</span> <span><span className="text-purple-500">import</span> {'{'} scan {'}'} <span className="text-purple-500">from</span> <span className="text-green-500">'@buildershub/ai'</span>;</span></div>
                                       <div className="flex gap-4"><span className="text-muted-foreground w-4 select-none">2</span> <span></span></div>
                                       <div className="flex gap-4"><span className="text-muted-foreground w-4 select-none">3</span> <span><span className="text-purple-500">async function</span> <span className="text-blue-500">analyzeCode</span>(snippet) {'{'}</span></div>
                                       <div className="flex gap-4"><span className="text-muted-foreground w-4 select-none">4</span> <span>  <span className="text-muted-foreground">// Detect vulnerabilities</span></span></div>

@@ -167,7 +167,7 @@ export const getReview = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.userId;
 
     const review = await prisma.codeReview.findUnique({
-      where: { id },
+      where: { id: id as string },
     });
 
     if (!review) {

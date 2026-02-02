@@ -8,12 +8,12 @@ export function TestimonialsSection() {
         <section className="py-24 border-t bg-background">
              <div className="container mx-auto px-4 text-center">
                  <h2 className="text-3xl font-bold mb-4">Trusted by engineering teams</h2>
-                 <p className="text-muted-foreground mb-16 max-w-2xl mx-auto">See why thousands of developers rely on BuildHive for their daily workflow.</p>
+                 <p className="text-muted-foreground mb-16 max-w-2xl mx-auto">See why thousands of developers rely on buildershub for their daily workflow.</p>
                  
                  <div className="grid md:grid-cols-3 gap-8 text-left">
                      {[
                          {
-                             quote: "BuildHive's AI reviews catch bugs that even our senior engineers miss. It's become an indispensable part of our CI/CD pipeline.",
+                             quote: "buildershub's AI reviews catch bugs that even our senior engineers miss. It's become an indispensable part of our CI/CD pipeline.",
                              author: "Sarah Chen",
                              role: "CTO at TechFlow",
                              avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"

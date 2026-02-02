@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import { createSubscriptionOrder, verifyPayment } from '../controllers/payment.controller.js';
+import { handleRazorpayWebhook } from '../controllers/payment.webhook.controller.js';
+import { getSubscriptionStatus } from '../controllers/subscription.controller.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
+const router = Router();
+router.post('/create-order', authenticate, createSubscriptionOrder);
+router.post('/verify', authenticate, verifyPayment);
+router.post('/webhook', handleRazorpayWebhook);
+router.get('/status', authenticate, getSubscriptionStatus);
+export default router;

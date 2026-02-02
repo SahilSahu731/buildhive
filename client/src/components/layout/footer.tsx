@@ -12,7 +12,7 @@ export function Footer() {
                <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
                  <div className="h-3 w-3 bg-background rounded-sm" />
                </div>
-               <span className="font-bold text-lg">BuildHive</span>
+               <span className="font-bold text-lg">buildershub</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               The premier platform for developers to build, collaborate, and ship amazing projects together.
@@ -60,7 +60,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} BuildHive. All rights reserved.
+          &copy; {new Date().getFullYear()} buildershub. All rights reserved.
         </div>
       </div>
     </footer>

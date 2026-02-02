@@ -13,7 +13,7 @@ export function CtaSection() {
              <div className="container mx-auto px-4 text-center relative z-10">
                  <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Ready to upgrade your code quality?</h2>
                  <p className="text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                     Join thousands of developers using BuildHive to write better code, faster. Get started with our free tier today.
+                     Join thousands of developers using buildershub to write better code, faster. Get started with our free tier today.
                  </p>
                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                      <Link href="/signup">

@@ -46,7 +46,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "BuildHive",
+        name: "buildershub",
         description: `Upgrade to ${plan} Plan`,
         order_id: orderData.orderId,
         handler: async (response: any) => {

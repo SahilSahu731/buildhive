@@ -21,7 +21,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
 
   try {
     await transporter.sendMail({
-      from: `"BuildHive" <${process.env.EMAIL_USER?.replace(/"/g, '')}>`,
+      from: `"buildershub" <${process.env.EMAIL_USER?.replace(/"/g, '')}>`,
       to,
       subject,
       html,

@@ -48,7 +48,7 @@ export function HowItWorksSection() {
                     <div className="order-1 lg:order-2">
                         <h2 className="text-3xl font-bold tracking-tight mb-6">Accelerate Your Journey</h2>
                         <p className="text-lg text-muted-foreground mb-8 text-pretty">
-                            Building side-projects shouldn't be lonely or chaotic. BuildHive provides the structure, network, and tools you need to succeed.
+                            Building side-projects shouldn't be lonely or chaotic. buildershub provides the structure, network, and tools you need to succeed.
                         </p>
                         <div className="space-y-4 mb-8">
                             {[

@@ -150,7 +150,7 @@ export function ProjectForm({ initialData, mode = "create" }: ProjectFormProps) 
                     <FormItem>
                     <FormLabel>Project Title</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g. BuildHive" {...field} />
+                        <Input placeholder="e.g. buildershub" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>

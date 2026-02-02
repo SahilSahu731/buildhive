@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ProjectCardSkeleton } from "@/components/loading/project-card-skeleton"
 
-export default function ProjectsPage() {
+// Move main logic to a separate component
+function ProjectsContent() {
   const searchParams = useSearchParams()
   const page = Number(searchParams.get("page")) || 1
   const category = searchParams.get("category")
@@ -132,5 +133,17 @@ export default function ProjectsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function ProjectsPage() {
+  return (
+    <React.Suspense fallback={
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+             {[1, 2, 3, 4].map((i) => <ProjectCardSkeleton key={i} />)}
+        </div>
+    }>
+       <ProjectsContent />
+    </React.Suspense>
   )
 }

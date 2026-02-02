@@ -10,7 +10,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     const { title, description, techStack, lookingFor, demoUrl, repoUrl, difficulty, category } = req.body;
     let { images } = req.body;
     const userId = req.user?.userId;
-    const files = req.files as Express.Multer.File[];
+    const files = (req as any).files;
 
     if (!userId) {
        res.status(401).json({ message: "Unauthorized" });
@@ -45,7 +45,7 @@ export const createProject = async (req: AuthRequest, res: Response) => {
 
     // Upload new files
     if (files && files.length > 0) {
-        const uploadPromises = files.map(file => uploadToCloudinary(file.buffer));
+        const uploadPromises = files.map((file: any) => uploadToCloudinary(file.buffer));
         const uploadedUrls = await Promise.all(uploadPromises);
         projectImages = [...projectImages, ...uploadedUrls];
     }
@@ -170,7 +170,7 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     const { title, description, techStack, lookingFor, status, demoUrl, repoUrl, difficulty, category } = req.body;
     let { images } = req.body;
     const userId = req.user?.userId;
-    const files = req.files as Express.Multer.File[];
+    const files = (req as any).files;
 
     const existingProject = await prisma.project.findUnique({ where: { id } });
 
@@ -216,7 +216,7 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
 
     // Upload new files
     if (files && files.length > 0) {
-        const uploadPromises = files.map(file => uploadToCloudinary(file.buffer));
+        const uploadPromises = files.map((file: any) => uploadToCloudinary(file.buffer));
         const uploadedUrls = await Promise.all(uploadPromises);
         projectImages = [...projectImages, ...uploadedUrls];
     }
