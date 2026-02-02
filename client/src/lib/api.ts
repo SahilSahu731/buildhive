@@ -203,3 +203,13 @@ export const getSubscriptionStatus = async () => {
     if (!response.ok) return null;
     return response.json();
 }
+
+export const getMyProjects = async () => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/projects/my`, {
+        method: "GET",
+        headers
+    });
+    if (!response.ok) return [];
+    return response.json();
+}

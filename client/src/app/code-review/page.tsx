@@ -232,7 +232,7 @@ export default function CodeReviewPage() {
                       <div className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
                       <div className="absolute inset-0 flex items-center justify-center">
                           <Code2 className="h-6 w-6 text-primary" />
-                      </div>BuildHive v1.0 is live
+                      </div>
 
                   </div>
                   <h3 className="mt-6 text-xl font-semibold animate-pulse">Analyzing Code Architecture...</h3>

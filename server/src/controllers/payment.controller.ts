@@ -20,8 +20,8 @@ export const createSubscriptionOrder = async (req: AuthRequest, res: Response) =
     }
 
     const priceMap = {
-      PREMIUM: 49900, // INR 499.00
-      PRO: 99900,     // INR 999.00
+      PREMIUM: 9900, // INR 99.00
+      PRO: 29900,     // INR 299.00
     };
 
     const amount = priceMap[plan as keyof typeof priceMap];
@@ -29,7 +29,7 @@ export const createSubscriptionOrder = async (req: AuthRequest, res: Response) =
     const options = {
       amount,
       currency: "INR",
-      receipt: `order_rcptid_${userId}_${Date.now()}`,
+      receipt: `rcpt_${Date.now().toString().slice(-10)}_${Math.floor(Math.random() * 1000)}`,
       notes: {
         userId,
         plan,

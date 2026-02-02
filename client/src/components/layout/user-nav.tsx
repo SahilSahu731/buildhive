@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { getMyProfile } from "@/lib/api"
 import Link from "next/link"
+import { CreditCard, History, LayoutDashboard, LogOut, Settings, User } from "lucide-react"
 
 export function UserNav() {
   const router = useRouter()
@@ -64,23 +65,43 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href={user?.githubUsername ? `/profile/${user.githubUsername}` : "/projects"}>
+          <Link href="/dashboard">
             <DropdownMenuItem>
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+            </DropdownMenuItem>
+          </Link>
+          <Link href={user?.githubUsername ? `/profile/${user.githubUsername}` : "/settings/profile"}>
+            <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
                 Profile
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem>
-            Billing
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          <Link href="/code-review/history">
+            <DropdownMenuItem>
+                <History className="mr-2 h-4 w-4" />
+                My Reviews
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings/billing">
+            <DropdownMenuItem>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Billing
+                <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings/profile">
+            <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+          <LogOut className="mr-2 h-4 w-4" />
           Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>

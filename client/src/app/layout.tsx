@@ -16,8 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BuildHive",
-  description: "Collaborate and build amazing projects",
+  title: {
+    default: "BuildHive | Build, Collaborate, & Review Code",
+    template: "%s | BuildHive"
+  },
+  description: "The ultimate platform for developers to collaborate on projects, get AI-powered code reviews, and showcase their portfolio.",
+  keywords: ["developer", "collaboration", "code review", "AI", "projects", "open source", "portfolio"],
 };
 
 export default function RootLayout({

@@ -134,7 +134,7 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
 // Get single project details
 export const getProjectById = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
 
     const project = await prisma.project.findUnique({
       where: { id },
@@ -166,7 +166,7 @@ export const getProjectById = async (req: AuthRequest, res: Response) => {
 // Update project
 export const updateProject = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { title, description, techStack, lookingFor, status, demoUrl, repoUrl, difficulty, category } = req.body;
     let { images } = req.body;
     const userId = req.user?.userId;
@@ -247,7 +247,7 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
 // Delete project
 export const deleteProject = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const userId = req.user?.userId;
 
     const existingProject = await prisma.project.findUnique({ where: { id } });
@@ -267,6 +267,35 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
     res.status(200).json({ message: "Project deleted successfully" });
   } catch (error) {
     console.error("Delete Project Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get logged-in user's projects
+export const getMyProjects = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+       return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const projects = await prisma.project.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+            select: {
+                id: true,
+                name: true,
+                image: true
+            }
+        }
+      }
+    });
+
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error("Get My Projects Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

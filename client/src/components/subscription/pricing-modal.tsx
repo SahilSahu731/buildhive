@@ -127,7 +127,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             <div className="border border-primary/50 bg-primary/5 rounded-xl p-6 flex flex-col items-center relative transform md:scale-105 shadow-xl">
                 <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">MOST POPULAR</div>
                 <h3 className="font-semibold text-lg mb-2 text-primary">Premium</h3>
-                <div className="text-3xl font-bold mb-4">₹499<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+                <div className="text-3xl font-bold mb-4">₹99<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                 <ul className="space-y-3 mb-8 w-full">
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> 50 AI Reviews / Day</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Priority Processing</li>
@@ -142,7 +142,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             {/* Pro Plan */}
             <div className="border rounded-xl p-6 flex flex-col items-center">
                 <h3 className="font-semibold text-lg mb-2">Pro</h3>
-                <div className="text-3xl font-bold mb-4">₹999<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
+                <div className="text-3xl font-bold mb-4">₹299<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                 <ul className="space-y-3 mb-8 w-full">
                     <li className="flex items-center gap-2"><Check className="h-4 w-4" /> 1000 Reviews / Day</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Fastest Processing</li>
