@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import prisma from '../lib/prisma.js';
+import { sendPremiumEmail } from '../services/email.service.js';
 
 export const handleRazorpayWebhook = async (req: Request, res: Response) => {
   try {
@@ -37,7 +38,7 @@ export const handleRazorpayWebhook = async (req: Request, res: Response) => {
             const endDate = new Date();
             endDate.setDate(endDate.getDate() + 30); // 30 days subscription
 
-            await prisma.user.update({
+            const updatedUser = await prisma.user.update({
                 where: { id: userId },
                 data: {
                     plan: notePlan as any,
@@ -46,6 +47,11 @@ export const handleRazorpayWebhook = async (req: Request, res: Response) => {
                 }
             });
             console.log(`User ${userId} upgraded to ${notePlan}`);
+
+            // Send Premium Email
+            if (updatedUser.email) {
+                await sendPremiumEmail(updatedUser.email, notePlan);
+            }
         }
     }
 

@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { generateOTP } from '../utils/generateOTP.js';
-import { sendEmail } from '../services/email.service.js';
+import { sendEmail, sendWelcomeEmail } from '../services/email.service.js';
 import { getOTPTemplate } from '../utils/emailTemplates.js';
 
 import prisma from '../lib/prisma.js';
@@ -91,6 +91,9 @@ export const verifyOtp = async (req: Request, res: Response) => {
           emailVerified: true,
         },
       });
+
+      // Send Welcome Email
+      await sendWelcomeEmail(email, name);
     } else {
       // Login
       user = await prisma.user.findUnique({ where: { email } });

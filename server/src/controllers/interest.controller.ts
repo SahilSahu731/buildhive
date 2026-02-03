@@ -3,6 +3,7 @@ import { Response, NextFunction } from 'express';
 import prisma from '../lib/prisma.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
 
+import { sendInterestEmail } from '../services/email.service.js';
 // Express Interest in a Project
 export const expressInterest = async (req: AuthRequest, res: Response) => {
   try {
@@ -16,8 +17,10 @@ export const expressInterest = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if project exists
+    // Check if project exists
     const project = await prisma.project.findUnique({
-        where: { id: String(projectId) }
+        where: { id: String(projectId) },
+        include: { user: { select: { email: true } } }
     });
 
     if (!project) {
@@ -55,7 +58,22 @@ export const expressInterest = async (req: AuthRequest, res: Response) => {
         }
     });
 
-    // TODO: Send Email Notification to Owner
+    // Send Email Notification to Owner
+    if (project.user && project.user.email) {
+        // Fetch requester name
+        const requester = await prisma.user.findUnique({ 
+            where: { id: userId }, 
+            select: { name: true } 
+        });
+        
+        await sendInterestEmail(
+            project.user.email, 
+            requester?.name || "A Developer", 
+            project.title, 
+            message || "No message provided", 
+            project.id
+        );
+    }
 
     res.status(201).json(interest);
   } catch (error) {
