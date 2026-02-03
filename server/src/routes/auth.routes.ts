@@ -26,7 +26,8 @@ router.get(
       email: user.email,
     });
 
-    const clientUrl = process.env.FRONTEND_URL;
+    // Redirect to frontend with token
+    const clientUrl = process.env.FRONTEND_URL || 'https://buildershub-three.vercel.app';
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
   }
 );
@@ -47,7 +48,8 @@ router.get(
       email: user.email,
     });
 
-    const clientUrl = process.env.FRONTEND_URL;
+    // Redirect to frontend with token
+    const clientUrl = process.env.FRONTEND_URL || 'https://buildershub-three.vercel.app';
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
   }
 );
