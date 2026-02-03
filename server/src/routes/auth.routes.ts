@@ -26,9 +26,7 @@ router.get(
       email: user.email,
     });
 
-    // Redirect to frontend with token
-    // Redirect to frontend with token
-    const clientUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.FRONTEND_URL;
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
   }
 );
@@ -49,9 +47,7 @@ router.get(
       email: user.email,
     });
 
-    // Redirect to frontend with token
-    // Redirect to frontend with token
-    const clientUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.FRONTEND_URL;
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
   }
 );
