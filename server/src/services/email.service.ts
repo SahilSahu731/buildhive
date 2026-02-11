@@ -35,25 +35,9 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
   }
 };
 
-import { getWelcomeTemplate, getPremiumTemplate, getLimitExhaustedTemplate, getInterestTemplate } from '../utils/emailTemplates.js';
+import { getWelcomeTemplate } from '../utils/emailTemplates.js';
 
 export const sendWelcomeEmail = async (to: string, name: string) => {
     const html = getWelcomeTemplate(name);
     await sendEmail(to, "Welcome to buildershub! 🚀", html);
 };
-
-export const sendPremiumEmail = async (to: string, plan: string) => {
-    const html = getPremiumTemplate(plan);
-    await sendEmail(to, `You are now a ${plan} member! 🌟`, html);
-};
-
-export const sendLimitExhaustedEmail = async (to: string, plan: string, limit: number) => {
-    const html = getLimitExhaustedTemplate(plan, limit);
-    await sendEmail(to, "Hourly Limit Reached ⚠️", html);
-};
-
-export const sendInterestEmail = async (to: string, requesterName: string, projectTitle: string, message: string, projectId: string) => {
-    const html = getInterestTemplate(requesterName, projectTitle, message, projectId);
-    await sendEmail(to, `New Interest in "${projectTitle}" 🔔`, html);
-};
-

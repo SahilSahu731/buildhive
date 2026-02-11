@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { GoogleAnalytics } from '@next/third-parties/google'
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -18,11 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "buildershub | Build, Collaborate, & Review Code",
+    default: "buildershub",
     template: "%s | buildershub"
   },
-  description: "The ultimate platform for developers to collaborate on projects, get AI-powered code reviews, and showcase their portfolio.",
-  keywords: ["developer", "collaboration", "code review", "AI", "projects", "open source", "portfolio"],
+  description: "buildershub - Build, Collaborate & Ship.",
 };
 
 export default function RootLayout({
@@ -41,11 +39,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-
           {children}
           <Toaster />
         </ThemeProvider>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       </body>
     </html>
   );

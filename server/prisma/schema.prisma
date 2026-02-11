@@ -7,6 +7,7 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
 model User {
   id             String    @id @default(cuid())
   name           String?
@@ -15,110 +16,18 @@ model User {
   password       String?
   image          String?
   githubId       String?   @unique
-  githubUsername String?   @unique
+  githubUsername  String?   @unique
   githubUrl      String?
   googleId       String?   @unique
   bio            String?   @db.Text
-  skills         String[]
-  availability   String?
-  timezone       String?
   role           String    @default("user")
   
-  // Subscription
-  plan                   Plan      @default(FREE)
-  razorpayCustomerId     String?
-  razorpaySubscriptionId String?
-  subscriptionStatus     String?   // active, past_due, etc.
-  subscriptionEndDate    DateTime?
-
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-  
-  projects       Project[]
-  interests      Interest[]
-  codeReviews    CodeReview[]
-  feedbacks      Feedback[]
   
   @@index([email])
   @@index([githubId])
   @@index([googleId])
-}
-
-enum Plan {
-  FREE
-  PREMIUM
-  PRO
-}
-
-model Feedback {
-  id          String   @id @default(cuid())
-  userId      String?
-  type        String   // BUG, FEEDBACK, FEATURE_REQUEST
-  title       String
-  description String   @db.Text
-  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
-  rating      Int?
-  createdAt   DateTime @default(now())
-  
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  @@index([userId])
-  @@index([status])
-  @@index([type])
-}
-
-model Announcement {
-  id          String   @id @default(cuid())
-  type        String   @default("BANNER") // BANNER, POPUP
-  message     String   @db.Text
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([isActive])
-}
-
-model Project {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  techStack   String[]
-  lookingFor  String
-  status      String   @default("open")
-  
-  // Rich content
-  images      String[]
-  demoUrl     String?
-  repoUrl     String?
-  difficulty  String   @default("Intermediate")
-  category    String   @default("Web Development")
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  interests   Interest[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([userId])
-  @@index([status])
-  @@index([category])
-  @@index([createdAt])
-}
-
-model Interest {
-  id        String   @id @default(cuid())
-  projectId String
-  userId    String
-  status    String   @default("pending")
-  message   String?  @db.Text
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  
-  @@unique([projectId, userId])
-  @@index([projectId])
-  @@index([userId])
-  @@index([status])
 }
 
 model Otp {
@@ -129,21 +38,4 @@ model Otp {
   createdAt DateTime @default(now())
 
   @@index([email])
-}
-
-model CodeReview {
-  id          String   @id @default(cuid())
-  userId      String?
-  code        String   @db.Text
-  language    String
-  score       Int?
-  issues      Json?    // Array of issues found
-  suggestions Json?    // Array of suggestions
-  resources   Json?    // Array of learning resources
-  createdAt   DateTime @default(now())
-  
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  @@index([userId])
-  @@index([createdAt])
 }

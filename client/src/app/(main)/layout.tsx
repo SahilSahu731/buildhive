@@ -1,7 +1,4 @@
 
-import { Navbar } from "@/components/layout/navbar";
-import { AnnouncementBanner } from "@/components/layout/announcement-banner";
-
 export default function MainLayout({
   children,
 }: Readonly<{
@@ -9,8 +6,6 @@ export default function MainLayout({
 }>) {
   return (
     <>
-      <AnnouncementBanner />
-      <Navbar />
       {children}
     </>
   );
