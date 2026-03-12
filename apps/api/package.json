@@ -1,0 +1,14 @@
+{
+  "name": "@buildhive/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "build": "node -e \"console.log('api build placeholder')\"",
+    "lint": "node -e \"console.log('api lint placeholder')\"",
+    "typecheck": "node -e \"console.log('api typecheck placeholder')\"",
+    "test": "node -e \"console.log('api test placeholder')\"",
+    "format": "node -e \"console.log('api format placeholder')\""
+  }
+}

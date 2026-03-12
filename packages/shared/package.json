@@ -1,0 +1,17 @@
+{
+  "name": "@buildhive/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "dev": "node src/index.js",
+    "build": "node -e \"console.log('shared build placeholder')\"",
+    "lint": "node -e \"console.log('shared lint placeholder')\"",
+    "typecheck": "node -e \"console.log('shared typecheck placeholder')\"",
+    "test": "node -e \"console.log('shared test placeholder')\"",
+    "format": "node -e \"console.log('shared format placeholder')\""
+  }
+}

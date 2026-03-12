@@ -1,5 +1,33 @@
-node_modules
+# dependencies
+node_modules/
+.pnpm-store/
+
+# env files
 .env
-.env.local
-.next
-DEPLOYMENT_GUIDE.md
+.env.*
+!.env.example
+
+# build outputs
+dist/
+build/
+coverage/
+.next/
+out/
+.turbo/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# local caches
+.cache/
+implementation.md
