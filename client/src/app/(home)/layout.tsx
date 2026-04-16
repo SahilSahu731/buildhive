@@ -1,8 +1,7 @@
-
-import { Navbar } from "@/components/layout/navbar";
 import { AnnouncementBanner } from "@/components/layout/announcement-banner";
+import { Navbar } from "@/components/layout/navbar";
 
-export default function MainLayout({
+export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

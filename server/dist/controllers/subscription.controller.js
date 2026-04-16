@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { calculateUsagePercent, normalizeQuotaDate, resolvePlanLimit } from '../lib/usage-quota.js';
 export const getSubscriptionStatus = async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -15,18 +16,19 @@ export const getSubscriptionStatus = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
         const plan = user.plan || 'FREE';
-        // 2. Define Limits
-        const limits = {
-            FREE: 5,
-            PREMIUM: 50,
-            PRO: 1000
-        };
-        const limit = limits[plan] || 5;
-        // Keep these fields for frontend compatibility until usage tracking is reworked.
-        const usage = 0;
-        const percentUsed = 0;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const limit = resolvePlanLimit(plan);
+        const today = normalizeQuotaDate();
+        const quota = await prisma.usageQuota.findUnique({
+            where: {
+                userId_quotaDate_actionType: {
+                    userId,
+                    quotaDate: today,
+                    actionType: 'WORKFLOW_ACTION',
+                },
+            },
+        });
+        const usage = quota?.usedCount || 0;
+        const percentUsed = calculateUsagePercent(usage, limit);
         res.json({
             plan,
             usage,

@@ -39,7 +39,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl py-8 space-y-8 mt-16 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-6xl py-2 space-y-8 px-0 sm:px-0 lg:px-0">
         <div className="flex items-center justify-between">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>

@@ -53,7 +53,11 @@ function VerifyOtpContent() {
       localStorage.setItem("user", JSON.stringify(res.user));
        
       toast.success(type === "signup" ? "Account created successfully!" : "Successfully logged in!");
-      router.push("/");
+      if (res.user?.onboardingCompleted) {
+        router.push("/dashboard");
+      } else {
+        router.push("/onboarding");
+      }
     } catch (error: any) {
       toast.error(error.message);
     } finally {

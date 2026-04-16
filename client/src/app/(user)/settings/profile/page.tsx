@@ -24,10 +24,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMyProfile, updateProfileAPI } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const profileFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   bio: z.string().max(160, "Bio must not be longer than 160 characters.").optional(),
+  skillLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]).optional(),
+  goal: z.string().max(240, "Goal must not be longer than 240 characters.").optional(),
+  preferredStack: z.string().max(120, "Preferred stack must not be longer than 120 characters.").optional(),
   skills: z.string().optional(), // Comma separated string for input
 })
 
@@ -48,6 +58,9 @@ export default function EditProfilePage() {
     defaultValues: {
       name: "",
       bio: "",
+      skillLevel: undefined,
+      goal: "",
+      preferredStack: "",
       skills: "",
     },
   })
@@ -59,6 +72,9 @@ export default function EditProfilePage() {
         form.reset({
           name: data.name || "",
           bio: data.bio || "",
+          skillLevel: data.skillLevel || undefined,
+          goal: data.goal || "",
+          preferredStack: data.preferredStack || "",
           skills: data.skills ? data.skills.join(", ") : "",
         })
         setCurrentImage(data.image)
@@ -95,6 +111,9 @@ export default function EditProfilePage() {
       const formData = new FormData()
       formData.append("name", data.name)
       if (data.bio) formData.append("bio", data.bio)
+      if (data.skillLevel) formData.append("skillLevel", data.skillLevel)
+      if (data.goal) formData.append("goal", data.goal)
+      if (data.preferredStack) formData.append("preferredStack", data.preferredStack)
       
       // Handle skills (split by comma and trim)
       const skillsArray = data.skills 
@@ -234,6 +253,61 @@ export default function EditProfilePage() {
 
             <FormField
               control={form.control}
+              name="skillLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Skill Level</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your current level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="BEGINNER">Beginner</SelectItem>
+                      <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
+                      <SelectItem value="ADVANCED">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="goal"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Primary Goal</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Example: Ship my first paid SaaS in 60 days"
+                      className="resize-none min-h-[90px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="preferredStack"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Preferred Stack</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Next.js + Node + PostgreSQL" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="skills"
               render={({ field }) => (
                 <FormItem>
@@ -266,6 +340,11 @@ export default function EditProfilePage() {
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                     Cancel
                 </Button>
+                <Link href="/settings/account">
+                  <Button type="button" variant="destructive">
+                    Delete Account
+                  </Button>
+                </Link>
             </div>
           </form>
         </Form>

@@ -4,6 +4,7 @@ import { useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { getMyProfile } from "@/lib/api"
 
 function CallbackContent() {
   const router = useRouter()
@@ -11,7 +12,13 @@ function CallbackContent() {
 
   useEffect(() => {
     const token = searchParams.get("token")
-    if (token) {
+    const handleCallback = async () => {
+      if (!token) {
+        toast.error("Failed to login with GitHub")
+        router.push("/login")
+        return
+      }
+
       // Store token in localStorage
       localStorage.setItem("token", token)
       
@@ -19,16 +26,20 @@ function CallbackContent() {
       window.dispatchEvent(new Event("storage"))
 
       toast.success("Successfully logged In.")
-      
-      // Redirect to home or dashboard
-      // Use setTimeout to allow toast to show briefly or state to settle
-      setTimeout(() => {
-          router.push("/")
-      }, 500)
-    } else {
-      toast.error("Failed to login with GitHub")
-      router.push("/login")
+
+      try {
+        const profile = await getMyProfile()
+        if (profile?.onboardingCompleted) {
+          router.push("/dashboard")
+        } else {
+          router.push("/onboarding")
+        }
+      } catch {
+        router.push("/login")
+      }
     }
+
+    handleCallback()
   }, [searchParams, router])
 
   return (

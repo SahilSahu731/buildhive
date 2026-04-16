@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma.js';
 import { uploadToCloudinary } from '../lib/cloudinary-upload.js';
+import { isDeleteConfirmationValid, normalizePreferredStack, normalizeSkills, toSkillLevel, } from '../lib/profile-utils.js';
 // Get Current User Profile
 export const getMyProfile = async (req, res) => {
     try {
@@ -16,6 +17,10 @@ export const getMyProfile = async (req, res) => {
                 email: true,
                 image: true,
                 bio: true,
+                skillLevel: true,
+                goal: true,
+                preferredStack: true,
+                onboardingCompleted: true,
                 skills: true,
                 githubUsername: true,
                 githubUrl: true,
@@ -95,7 +100,7 @@ export const getUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user?.userId;
-        const { name, bio, skills } = req.body;
+        const { name, bio, skills, skillLevel, goal, preferredStack } = req.body;
         const file = req.file;
         if (!userId) {
             res.status(401).json({ message: "Unauthorized" });
@@ -103,24 +108,29 @@ export const updateProfile = async (req, res) => {
         }
         let parsedSkills = skills;
         if (typeof skills === 'string') {
-            // Handle JSON stringified array or comma separated
             try {
                 parsedSkills = JSON.parse(skills);
             }
             catch {
-                parsedSkills = skills.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+                parsedSkills = skills;
             }
         }
         let imageUrl = undefined;
         if (file) {
             imageUrl = await uploadToCloudinary(file.buffer);
         }
+        const normalizedSkills = normalizeSkills(parsedSkills);
+        const normalizedSkillLevel = toSkillLevel(skillLevel ? String(skillLevel) : undefined);
+        const normalizedPreferredStack = normalizePreferredStack(preferredStack ? String(preferredStack) : undefined);
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: {
                 name: name ? String(name) : undefined,
                 bio: bio ? String(bio) : undefined,
-                skills: Array.isArray(parsedSkills) ? parsedSkills : undefined,
+                skills: normalizedSkills,
+                skillLevel: normalizedSkillLevel,
+                goal: goal ? String(goal).trim() : undefined,
+                preferredStack: normalizedPreferredStack,
                 image: imageUrl
             }
         });
@@ -128,6 +138,82 @@ export const updateProfile = async (req, res) => {
     }
     catch (error) {
         console.error("Update Profile Error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+export const completeOnboarding = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+        const { skillLevel, goal, preferredStack, skills } = req.body;
+        const parsedSkillLevel = toSkillLevel(skillLevel ? String(skillLevel) : undefined);
+        const parsedGoal = goal ? String(goal).trim() : "";
+        const parsedPreferredStack = normalizePreferredStack(preferredStack ? String(preferredStack) : undefined);
+        const parsedSkills = normalizeSkills(skills) || [];
+        if (!parsedSkillLevel) {
+            res.status(400).json({ message: "Valid skill level is required." });
+            return;
+        }
+        if (!parsedGoal) {
+            res.status(400).json({ message: "Goal is required." });
+            return;
+        }
+        const user = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                skillLevel: parsedSkillLevel,
+                goal: parsedGoal,
+                preferredStack: parsedPreferredStack,
+                skills: parsedSkills,
+                onboardingCompleted: true,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                onboardingCompleted: true,
+                skillLevel: true,
+                goal: true,
+                preferredStack: true,
+                skills: true,
+            },
+        });
+        res.status(200).json({ message: "Onboarding completed", user });
+    }
+    catch (error) {
+        console.error("Complete onboarding error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+export const deleteMyAccount = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+        const { confirmText, email } = req.body;
+        if (!isDeleteConfirmationValid(confirmText ? String(confirmText) : undefined)) {
+            res.status(400).json({ message: "Please type DELETE to confirm account deletion." });
+            return;
+        }
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+        if (email && String(email).trim().toLowerCase() !== user.email.toLowerCase()) {
+            res.status(400).json({ message: "Email confirmation does not match your account." });
+            return;
+        }
+        await prisma.user.delete({ where: { id: userId } });
+        res.status(200).json({ message: "Account deleted successfully" });
+    }
+    catch (error) {
+        console.error("Delete account error:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };

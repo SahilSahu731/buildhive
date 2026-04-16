@@ -193,6 +193,43 @@ export const updateProfileAPI = async (data: FormData) => {
     return response.json();
 }
 
+export const completeOnboardingAPI = async (data: {
+    skillLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+    goal: string;
+    preferredStack?: string;
+    skills?: string[];
+}) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/users/onboarding`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to complete onboarding");
+    }
+
+    return response.json();
+}
+
+export const deleteMyAccountAPI = async (confirmText: string, email?: string) => {
+    const headers = getHeaders();
+    const response = await fetch(`${API_URL}/users/me`, {
+        method: "DELETE",
+        headers,
+        body: JSON.stringify({ confirmText, email }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete account");
+    }
+
+    return response.json();
+}
+
 
 export const getSubscriptionStatus = async () => {
     const headers = getHeaders();

@@ -76,11 +76,42 @@ export const verifyOtp = async (req, res) => {
         }
         else {
             // Login
-            user = await prisma.user.findUnique({ where: { email } });
+            user = await prisma.user.findUnique({
+                where: { email },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    onboardingCompleted: true,
+                    skillLevel: true,
+                    goal: true,
+                    preferredStack: true,
+                    skills: true,
+                },
+            });
             if (!user) {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
+        }
+        if (type === "signup") {
+            user = await prisma.user.findUnique({
+                where: { email },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    onboardingCompleted: true,
+                    skillLevel: true,
+                    goal: true,
+                    preferredStack: true,
+                    skills: true,
+                },
+            });
+        }
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
         }
         // Delete OTP after successful use
         await prisma.otp.delete({ where: { email } });

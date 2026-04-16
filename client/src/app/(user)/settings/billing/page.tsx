@@ -41,7 +41,7 @@ export default function BillingPage() {
   const isFree = subscription.plan === 'FREE';
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 space-y-8 mt-16 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-4xl py-2 space-y-8 px-0">
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Billing & Subscription</h1>
             <p className="text-muted-foreground">Manage your plan and usage limits.</p>
@@ -89,12 +89,12 @@ export default function BillingPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Usage Limits</CardTitle>
-                    <CardDescription>Your daily code review usage.</CardDescription>
+                    <CardDescription>Your daily workflow actions usage.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                            <span>Code Reviews</span>
+                            <span>Workflow Actions</span>
                             <span className="text-muted-foreground">{subscription.usage} / {subscription.limit}</span>
                         </div>
                         <Progress value={subscription.percentUsed} className="h-2" />

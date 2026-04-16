@@ -4,10 +4,12 @@ import prisma from '../lib/prisma.js';
 import dotenv from 'dotenv';
 dotenv.config();
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:5000';
+const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL || `${SERVER_URL}/api/auth/github/callback`;
+const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || `${SERVER_URL}/api/auth/google/callback`;
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID || 'GITHUB_CLIENT_ID_PLACEHOLDER',
     clientSecret: process.env.GITHUB_CLIENT_SECRET || 'GITHUB_CLIENT_SECRET_PLACEHOLDER',
-    callbackURL: process.env.GITHUB_CALLBACK_URL,
+    callbackURL: GITHUB_CALLBACK_URL,
     scope: ['user:email'],
     proxy: true,
 }, async (accessToken, refreshToken, profile, done) => {
@@ -71,7 +73,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID_PLACEHOLDER',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET_PLACEHOLDER',
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || `${SERVER_URL}/api/auth/google/callback`,
+    callbackURL: GOOGLE_CALLBACK_URL,
     proxy: true,
 }, async (accessToken, refreshToken, profile, done) => {
     try {

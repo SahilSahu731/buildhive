@@ -50,7 +50,7 @@ function ProjectsContent() {
   return (
     <div className=" bg-background">
       {/* Feed Header */}
-      <div className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 p-4 mt-16 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="sticky top-14 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 p-4 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
          <div className="flex items-center gap-2 w-full max-w-md">
             <div className="relative w-full">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
