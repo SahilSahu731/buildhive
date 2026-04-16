@@ -27,7 +27,7 @@ router.get(
     });
 
     // Redirect to frontend with token
-    const clientUrl = process.env.FRONTEND_URL || 'https://buildershub-three.vercel.app';
+    const clientUrl = process.env.FRONTEND_URL || 'https://vibeship.app';
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
   }
 );
@@ -49,7 +49,7 @@ router.get(
     });
 
     // Redirect to frontend with token
-    const clientUrl = process.env.FRONTEND_URL || 'https://buildershub-three.vercel.app';
+    const clientUrl = process.env.FRONTEND_URL || 'https://vibeship.app';
     res.redirect(`${clientUrl}/auth/callback?token=${token}`);
   }
 );

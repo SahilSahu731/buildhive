@@ -14,17 +14,37 @@ const transporter = nodemailer.createTransport({
     },
 });
 export const sendEmail = async (to, subject, html) => {
-    if (!hasValidCredentials())
+    if (!hasValidCredentials()) {
+        console.warn("Email credentials missing. Skipping email.");
         return;
+    }
     try {
         await transporter.sendMail({
-            from: `"buildershub" <${process.env.EMAIL_USER?.replace(/"/g, '')}>`,
+            from: `"vibeship" <${process.env.EMAIL_USER?.replace(/"/g, '')}>`,
             to,
             subject,
             html,
         });
+        console.log(`Email sent to ${to}: ${subject}`);
     }
     catch (error) {
         console.error('Error sending email:', error);
     }
+};
+import { getWelcomeTemplate, getPremiumTemplate, getLimitExhaustedTemplate, getInterestTemplate } from '../utils/emailTemplates.js';
+export const sendWelcomeEmail = async (to, name) => {
+    const html = getWelcomeTemplate(name);
+    await sendEmail(to, "Welcome to vibeship! 🚀", html);
+};
+export const sendPremiumEmail = async (to, plan) => {
+    const html = getPremiumTemplate(plan);
+    await sendEmail(to, `You are now a ${plan} member! 🌟`, html);
+};
+export const sendLimitExhaustedEmail = async (to, plan, limit) => {
+    const html = getLimitExhaustedTemplate(plan, limit);
+    await sendEmail(to, "Hourly Limit Reached ⚠️", html);
+};
+export const sendInterestEmail = async (to, requesterName, projectTitle, message, projectId) => {
+    const html = getInterestTemplate(requesterName, projectTitle, message, projectId);
+    await sendEmail(to, `New Interest in "${projectTitle}" 🔔`, html);
 };

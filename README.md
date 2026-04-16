@@ -1,5 +1,5 @@
-# buildershub
-> **The ultimate platform for developers to collaborate on projects, get AI-powered code reviews, and showcase their portfolio.**
+# vibeship
+> **AI workflow OS for developers to vibe-code faster, ship cleaner output, and keep learning with practical roadmaps.**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
@@ -120,4 +120,4 @@ Contributions are always welcome!
 This project is open sourced under the **MIT License**.
 
 ---
-**buildershub** — Built by [Sahil Sahu](https://github.com/SahilSahu731)
+**vibeship** — Built by [Sahil Sahu](https://github.com/SahilSahu731)

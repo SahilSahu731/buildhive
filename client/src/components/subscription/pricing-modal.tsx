@@ -46,7 +46,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "buildershub",
+        name: "vibeship",
         description: `Upgrade to ${plan} Plan`,
         order_id: orderData.orderId,
         handler: async (response: any) => {
@@ -116,8 +116,8 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 <h3 className="font-semibold text-lg mb-2">Free</h3>
                 <div className="text-3xl font-bold mb-4">₹0<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                 <ul className="space-y-3 mb-8 w-full">
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4" /> 5 AI Reviews / Day</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Basic Analysis</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4" /> 5 workflow actions / day</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Basic prompt packs</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Community Support</li>
                 </ul>
                 <Button className="w-full mt-auto" variant="outline" disabled>Current Plan</Button>
@@ -129,9 +129,9 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 <h3 className="font-semibold text-lg mb-2 text-primary">Premium</h3>
                 <div className="text-3xl font-bold mb-4">₹99<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                 <ul className="space-y-3 mb-8 w-full">
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> 50 AI Reviews / Day</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Priority Processing</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Advanced Security Checks</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> 50 workflow actions / day</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Full workflow library</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Advanced prompt packs</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Email Support</li>
                 </ul>
                 <Button className="w-full mt-auto" onClick={() => handleSubscribe('PREMIUM')} disabled={loading}>
@@ -144,9 +144,9 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 <h3 className="font-semibold text-lg mb-2">Pro</h3>
                 <div className="text-3xl font-bold mb-4">₹299<span className="text-sm font-normal text-muted-foreground">/mo</span></div>
                 <ul className="space-y-3 mb-8 w-full">
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4" /> 1000 Reviews / Day</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Fastest Processing</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Custom Rules (Coming Soon)</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4" /> 1000 workflow actions / day</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Fastest processing queue</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Team playbooks (Coming Soon)</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4" /> 24/7 Priority Support</li>
                 </ul>
                 <Button className="w-full mt-auto" variant="outline" onClick={() => handleSubscribe('PRO')} disabled={loading}>

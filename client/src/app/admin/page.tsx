@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react"
 import { getAdminStats } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FolderOpen, Code2, DollarSign } from "lucide-react"
+import { Users, FolderOpen, DollarSign } from "lucide-react"
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null)
@@ -37,12 +37,6 @@ export default function AdminDashboard() {
               value={stats.projects} 
               icon={<FolderOpen className="w-4 h-4 text-muted-foreground" />} 
               subtext="Launched projects"
-           />
-           <StatsCard 
-              title="Total Code Reviews" 
-              value={stats.reviews} 
-              icon={<Code2 className="w-4 h-4 text-muted-foreground" />} 
-              subtext="AI Analyses performed"
            />
            <StatsCard 
               title="Monthly Revenue" 

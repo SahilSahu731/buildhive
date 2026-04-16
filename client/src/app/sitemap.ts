@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
  
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://buildershub.vercel.app'; // Replace with your actual domain
+  const baseUrl = 'https://vibeship.app';
 
   return [
     {
@@ -16,12 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 0.8,
     },
-    {
-        url: `${baseUrl}/code-review`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.8,
-      },
     {
       url: `${baseUrl}/login`,
       lastModified: new Date(),

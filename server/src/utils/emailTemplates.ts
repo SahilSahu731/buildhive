@@ -19,13 +19,13 @@ const baseTemplate = (content: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>buildershub</h1>
+      <h1>vibeship</h1>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      &copy; ${new Date().getFullYear()} buildershub. All rights reserved.<br>
+      &copy; ${new Date().getFullYear()} vibeship. All rights reserved.<br>
       Is this email not relevant? <a href="#" style="color:#666; text-decoration:underline;">Unsubscribe</a>
     </div>
   </div>
@@ -35,12 +35,12 @@ const baseTemplate = (content: string) => `
 
 export const getWelcomeTemplate = (name: string) => baseTemplate(`
   <h2>Welcome to the community, ${name}! 🚀</h2>
-  <p>We're thrilled to have you on board. buildershub is where your best work begins.</p>
+  <p>We're thrilled to have you on board. vibeship is where AI-first builders ship faster with better quality.</p>
   <p>Here's what you can do next:</p>
   <ul>
-    <li>🔍 <strong>Analyze Code:</strong> Try our AI code reviewer.</li>
-    <li>🤝 <strong>Collaborate:</strong> Find a project to join.</li>
-    <li>💼 <strong>Build Portfolio:</strong> Showcase your skills.</li>
+    <li>🧭 <strong>Pick a Workflow:</strong> Start from practical build playbooks.</li>
+    <li>🧠 <strong>Use Prompt Packs:</strong> Write stronger prompts with less trial and error.</li>
+    <li>🚀 <strong>Follow Your Roadmap:</strong> Keep progressing toward your dev goals.</li>
   </ul>
   <center>
     <a href="${process.env.FRONTEND_URL}/dashboard" class="btn" style="color:#fff;">Go to Dashboard</a>
@@ -54,7 +54,8 @@ export const getPremiumTemplate = (plan: string) => baseTemplate(`
   <div class="info">
     <strong>What's new:</strong>
     <ul style="margin-top:10px; padding-left:20px;">
-      <li>Increased AI Code Reviews</li>
+      <li>Full workflow library</li>
+      <li>Advanced prompt packs and roadmap tools</li>
       <li>Priority support</li>
       <li>Profile badges</li>
     </ul>
@@ -62,7 +63,7 @@ export const getPremiumTemplate = (plan: string) => baseTemplate(`
   
   <p>Go ahead and test your new limits!</p>
   <center>
-    <a href="${process.env.FRONTEND_URL}/code-review" class="btn" style="color:#fff;">Try AI Review</a>
+    <a href="${process.env.FRONTEND_URL}/dashboard" class="btn" style="color:#fff;">Open Dashboard</a>
   </center>
 `);
 
@@ -81,7 +82,7 @@ export const getOTPTemplate = (otp: string) => baseTemplate(`
 
 export const getLimitExhaustedTemplate = (plan: string, limit: number) => baseTemplate(`
   <h2>⚠️ Daily Limit Reached</h2>
-  <p>You've hit your daily limit of <strong>${limit} code reviews</strong> for the <strong>${plan}</strong> plan.</p>
+  <p>You've hit your daily usage limit of <strong>${limit} actions</strong> for the <strong>${plan}</strong> plan.</p>
   
   <div class="alert">
     <strong>Need more?</strong><br>

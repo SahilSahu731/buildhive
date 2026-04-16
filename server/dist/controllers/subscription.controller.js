@@ -22,16 +22,11 @@ export const getSubscriptionStatus = async (req, res) => {
             PRO: 1000
         };
         const limit = limits[plan] || 5;
-        // 3. Count Usage Today
+        // Keep these fields for frontend compatibility until usage tracking is reworked.
+        const usage = 0;
+        const percentUsed = 0;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const usage = await prisma.codeReview.count({
-            where: {
-                userId,
-                createdAt: { gte: today }
-            }
-        });
-        const percentUsed = Math.min(Math.round((usage / limit) * 100), 100);
         res.json({
             plan,
             usage,

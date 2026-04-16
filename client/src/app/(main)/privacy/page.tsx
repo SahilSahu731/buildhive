@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-  title: "Privacy Policy | buildershub",
-  description: "Privacy Policy for buildershub",
+  title: "Privacy Policy | vibeship",
+  description: "Privacy Policy for vibeship",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
             <p>
-            Welcome to <strong>buildershub</strong>. We respect your privacy and are committed to protecting your personal data. 
+            Welcome to <strong>vibeship</strong>. We respect your privacy and are committed to protecting your personal data. 
             This Privacy Policy explains how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.
             </p>
         </section>
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-semibold mb-4">5. Contact Us</h2>
             <p>
             If you have any questions about this privacy policy or our privacy practices, please contact us at:{" "}
-            <a href="mailto:support@buildershub.com" className="text-primary hover:underline">support@buildershub.com</a>.
+            <a href="mailto:support@vibeship.app" className="text-primary hover:underline">support@vibeship.app</a>.
             </p>
         </section>
       </div>

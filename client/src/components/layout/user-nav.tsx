@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { getMyProfile } from "@/lib/api"
 import Link from "next/link"
-import { CreditCard, History, LayoutDashboard, LogOut, Settings, User, ShieldAlert } from "lucide-react"
+import { CreditCard, LayoutDashboard, LogOut, Settings, User, ShieldAlert } from "lucide-react"
 
 export function UserNav() {
   const router = useRouter()
@@ -84,12 +84,6 @@ export function UserNav() {
                 <User className="mr-2 h-4 w-4" />
                 Profile
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/code-review/history">
-            <DropdownMenuItem>
-                <History className="mr-2 h-4 w-4" />
-                My Reviews
             </DropdownMenuItem>
           </Link>
           <Link href="/settings/billing">

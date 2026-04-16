@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import prisma from '../lib/prisma.js';
+import { sendPremiumEmail } from '../services/email.service.js';
 export const handleRazorpayWebhook = async (req, res) => {
     try {
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET || '');
@@ -27,7 +28,7 @@ export const handleRazorpayWebhook = async (req, res) => {
             if (userId && notePlan) {
                 const endDate = new Date();
                 endDate.setDate(endDate.getDate() + 30); // 30 days subscription
-                await prisma.user.update({
+                const updatedUser = await prisma.user.update({
                     where: { id: userId },
                     data: {
                         plan: notePlan,
@@ -36,6 +37,10 @@ export const handleRazorpayWebhook = async (req, res) => {
                     }
                 });
                 console.log(`User ${userId} upgraded to ${notePlan}`);
+                // Send Premium Email
+                if (updatedUser.email) {
+                    await sendPremiumEmail(updatedUser.email, notePlan);
+                }
             }
         }
         res.json({ status: 'ok' });

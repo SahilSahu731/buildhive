@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { sendInterestEmail } from '../services/email.service.js';
 // Express Interest in a Project
 export const expressInterest = async (req, res) => {
     try {
@@ -10,8 +11,10 @@ export const expressInterest = async (req, res) => {
             return;
         }
         // Check if project exists
+        // Check if project exists
         const project = await prisma.project.findUnique({
-            where: { id: String(projectId) }
+            where: { id: String(projectId) },
+            include: { user: { select: { email: true } } }
         });
         if (!project) {
             res.status(404).json({ message: "Project not found" });
@@ -43,7 +46,15 @@ export const expressInterest = async (req, res) => {
                 status: "pending"
             }
         });
-        // TODO: Send Email Notification to Owner
+        // Send Email Notification to Owner
+        if (project.user && project.user.email) {
+            // Fetch requester name
+            const requester = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { name: true }
+            });
+            await sendInterestEmail(project.user.email, requester?.name || "A Developer", project.title, message || "No message provided", project.id);
+        }
         res.status(201).json(interest);
     }
     catch (error) {

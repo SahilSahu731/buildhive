@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
  
 export const runtime = 'edge'
  
-export const alt = 'buildershub - Build, Collaborate, & Review Code'
+export const alt = 'vibeship - AI workflow OS for developers'
 export const size = {
   width: 1200,
   height: 630,
@@ -15,7 +15,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(to bottom right, #000000, #1a1a1a)',
+          background: '#0f172a',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -58,7 +58,7 @@ export default async function Image() {
             marginBottom: '20px',
           }}
         >
-          buildershub
+          vibeship
         </div>
         <div
           style={{
@@ -68,7 +68,7 @@ export default async function Image() {
             maxWidth: '800px',
           }}
         >
-          AI-Powered Code Reviews & Developer Community
+          Vibe code faster. Ship cleaner.
         </div>
       </div>
     ),

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { generateOTP } from '../utils/generateOTP.js';
-import { sendEmail } from '../services/email.service.js';
+import { sendEmail, sendWelcomeEmail } from '../services/email.service.js';
 import { getOTPTemplate } from '../utils/emailTemplates.js';
 import prisma from '../lib/prisma.js';
 export const sendOtp = async (req, res) => {
@@ -71,6 +71,8 @@ export const verifyOtp = async (req, res) => {
                     emailVerified: true,
                 },
             });
+            // Send Welcome Email
+            await sendWelcomeEmail(email, name);
         }
         else {
             // Login

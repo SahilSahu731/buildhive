@@ -24,7 +24,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
 
   try {
     await transporter.sendMail({
-      from: `"buildershub" <${process.env.EMAIL_USER?.replace(/"/g, '')}>`,
+      from: `"vibeship" <${process.env.EMAIL_USER?.replace(/"/g, '')}>`,
       to,
       subject,
       html,
@@ -39,7 +39,7 @@ import { getWelcomeTemplate, getPremiumTemplate, getLimitExhaustedTemplate, getI
 
 export const sendWelcomeEmail = async (to: string, name: string) => {
     const html = getWelcomeTemplate(name);
-    await sendEmail(to, "Welcome to buildershub! 🚀", html);
+  await sendEmail(to, "Welcome to vibeship! 🚀", html);
 };
 
 export const sendPremiumEmail = async (to: string, plan: string) => {

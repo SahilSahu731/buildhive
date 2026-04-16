@@ -22,7 +22,6 @@
   "author": "Sahil Sahu",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^5.10.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/body-parser": "^1.19.6",
@@ -46,7 +45,6 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",
-    "express-rate-limit": "^8.2.1",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.1",
     "jsonwebtoken": "^9.0.2",

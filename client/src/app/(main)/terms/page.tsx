@@ -1,8 +1,8 @@
 import React from "react";
 
 export const metadata = {
-  title: "Terms of Service | buildershub",
-  description: "Terms of Service for buildershub",
+  title: "Terms of Service | vibeship",
+  description: "Terms of Service for vibeship",
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
         <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Agreement to Terms</h2>
             <p>
-            By accessing or using our services at <strong>buildershub</strong>, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service.
+            By accessing or using our services at <strong>vibeship</strong>, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service.
             </p>
         </section>
 
@@ -42,7 +42,7 @@ export default function TermsPage() {
         <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">4. Intellectual Property</h2>
             <p>
-            The Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of buildershub and its licensors.
+            The Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of vibeship and its licensors.
             </p>
         </section>
 

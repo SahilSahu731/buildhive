@@ -18,11 +18,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "buildershub | Build, Collaborate, & Review Code",
-    template: "%s | buildershub"
+    default: "vibeship | AI Workflow OS for Developers",
+    template: "%s | vibeship"
   },
-  description: "The ultimate platform for developers to collaborate on projects, get AI-powered code reviews, and showcase their portfolio.",
-  keywords: ["developer", "collaboration", "code review", "AI", "projects", "open source", "portfolio"],
+  description: "vibeship helps developers vibe-code faster with practical workflows, prompt packs, and roadmaps.",
+  keywords: ["vibe coding", "developer workflow", "AI roadmap", "prompt packs", "software development"],
 };
 
 export default function RootLayout({

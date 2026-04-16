@@ -42,10 +42,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/auth", authRoutes);
 import interestRoutes from "./routes/interest.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import codeReviewRoutes from "./routes/code-review.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import feedbackRoutes from "./routes/feedback.routes.js";
@@ -55,7 +53,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/interests", interestRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/code-reviews", codeReviewRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);

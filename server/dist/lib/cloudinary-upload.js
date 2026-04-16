@@ -3,7 +3,7 @@ import streamifier from 'streamifier';
 import '../config/cloudinary.js'; // Ensure config is loaded
 export const uploadToCloudinary = (buffer) => {
     return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream({ folder: 'buildershub_projects', resource_type: "auto" }, (error, result) => {
+        const uploadStream = cloudinary.uploader.upload_stream({ folder: 'vibeship_projects', resource_type: "auto" }, (error, result) => {
             if (error) {
                 console.error("Cloudinary Upload Error:", error);
                 return reject(error);

@@ -36,7 +36,6 @@ model User {
   
   projects       Project[]
   interests      Interest[]
-  codeReviews    CodeReview[]
   feedbacks      Feedback[]
   
   @@index([email])
@@ -129,21 +128,4 @@ model Otp {
   createdAt DateTime @default(now())
 
   @@index([email])
-}
-
-model CodeReview {
-  id          String   @id @default(cuid())
-  userId      String?
-  code        String   @db.Text
-  language    String
-  score       Int?
-  issues      Json?    // Array of issues found
-  suggestions Json?    // Array of suggestions
-  resources   Json?    // Array of learning resources
-  createdAt   DateTime @default(now())
-  
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  @@index([userId])
-  @@index([createdAt])
 }

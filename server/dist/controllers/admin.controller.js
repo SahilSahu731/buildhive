@@ -4,7 +4,6 @@ export const getAdminStats = async (req, res) => {
     try {
         const totalUsers = await prisma.user.count();
         const totalProjects = await prisma.project.count();
-        const totalReviews = await prisma.codeReview.count();
         // Subscription breakdown
         const freeUsers = await prisma.user.count({ where: { plan: 'FREE' } });
         const premiumUsers = await prisma.user.count({ where: { plan: 'PREMIUM' } });
@@ -20,7 +19,6 @@ export const getAdminStats = async (req, res) => {
                 pro: proUsers
             },
             projects: totalProjects,
-            reviews: totalReviews,
             revenue: {
                 mrr: mrr
             }
@@ -49,7 +47,7 @@ export const getAllUsers = async (req, res) => {
                 plan: true,
                 createdAt: true,
                 _count: {
-                    select: { projects: true, codeReviews: true }
+                    select: { projects: true }
                 }
             }
         });
