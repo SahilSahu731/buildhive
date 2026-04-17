@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
+import workflowRoutes from "./routes/workflow.routes.js";
+import promptPackRoutes from "./routes/prompt-pack.routes.js";
 
 dotenv.config();
 
@@ -51,6 +53,8 @@ import announcementRoutes from "./routes/announcement.routes.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/workflows", workflowRoutes);
+app.use("/api/prompt-packs", promptPackRoutes);
 app.use("/api/interests", interestRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payment", paymentRoutes);

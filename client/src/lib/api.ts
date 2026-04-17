@@ -124,6 +124,163 @@ export const deleteProject = async (id: string) => {
   return response.json();
 };
 
+// Workflow Library
+export const getWorkflowsAPI = async (params?: {
+    page?: number;
+    limit?: number;
+    stack?: string;
+    difficulty?: string;
+    useCase?: string;
+    search?: string;
+}) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.stack) query.set("stack", params.stack);
+    if (params?.difficulty) query.set("difficulty", params.difficulty);
+    if (params?.useCase) query.set("useCase", params.useCase);
+    if (params?.search) query.set("search", params.search);
+
+    const response = await fetch(`${API_URL}/workflows${query.toString() ? `?${query.toString()}` : ""}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch workflows");
+    return response.json();
+};
+
+export const getWorkflowBySlugAPI = async (slug: string) => {
+    const response = await fetch(`${API_URL}/workflows/${slug}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch workflow details");
+    return response.json();
+};
+
+export const setWorkflowStepCompletionAPI = async (
+    workflowId: string,
+    stepId: string,
+    isCompleted: boolean
+) => {
+    const response = await fetch(`${API_URL}/workflows/id/${workflowId}/steps/${stepId}`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ isCompleted }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update workflow step");
+    }
+    return response.json();
+};
+
+export const getWorkflowResumeStepAPI = async (workflowId: string) => {
+    const response = await fetch(`${API_URL}/workflows/id/${workflowId}/resume`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch resume step");
+    }
+    return response.json();
+};
+
+export const bookmarkWorkflowAPI = async (workflowId: string) => {
+    const response = await fetch(`${API_URL}/workflows/id/${workflowId}/bookmark`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to bookmark workflow");
+    }
+    return response.json();
+};
+
+export const unbookmarkWorkflowAPI = async (workflowId: string) => {
+    const response = await fetch(`${API_URL}/workflows/id/${workflowId}/bookmark`, {
+        method: "DELETE",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to remove bookmark");
+    }
+    return response.json();
+};
+
+// Prompt Packs
+export const getPromptPacksAPI = async (params?: {
+    page?: number;
+    limit?: number;
+    targetTool?: string;
+    tag?: string;
+    search?: string;
+}) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.targetTool) query.set("targetTool", params.targetTool);
+    if (params?.tag) query.set("tag", params.tag);
+    if (params?.search) query.set("search", params.search);
+
+    const response = await fetch(`${API_URL}/prompt-packs${query.toString() ? `?${query.toString()}` : ""}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch prompt packs");
+    return response.json();
+};
+
+export const getPromptPackBySlugAPI = async (slug: string) => {
+    const response = await fetch(`${API_URL}/prompt-packs/${slug}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch prompt pack details");
+    return response.json();
+};
+
+export const togglePromptTemplateFavoriteAPI = async (templateId: string) => {
+    const response = await fetch(`${API_URL}/prompt-packs/templates/${templateId}/favorite`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to favorite prompt template");
+    }
+    return response.json();
+};
+
+export const trackPromptTemplateUsageAPI = async (
+    templateId: string,
+    actionType: "COPY" | "RENDER"
+) => {
+    const response = await fetch(`${API_URL}/prompt-packs/templates/${templateId}/usage`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ actionType }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to track prompt usage");
+    }
+    return response.json();
+};
+
 // Interest System
 export const expressInterestAPI = async (projectId: string, message: string) => {
     const headers = getHeaders();

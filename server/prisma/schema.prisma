@@ -44,6 +44,10 @@ model User {
   roadmaps       Roadmap[]
   progressEvents ProgressEvent[]
   usageQuotas    UsageQuota[]
+  workflowBookmarks WorkflowBookmark[]
+  workflowStepProgress WorkflowStepProgress[]
+  promptTemplateFavorites PromptTemplateFavorite[]
+  promptTemplateUsages PromptTemplateUsage[]
   
   @@index([email])
   @@index([githubId])
@@ -160,6 +164,8 @@ model Workflow {
   promptPacks      PromptPack[]
   roadmaps         Roadmap[]
   progressEvents   ProgressEvent[]
+  bookmarks        WorkflowBookmark[]
+  stepProgress     WorkflowStepProgress[]
 
   @@index([category])
   @@index([difficulty])
@@ -176,6 +182,7 @@ model WorkflowStep {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  progress    WorkflowStepProgress[]
 
   @@unique([workflowId, stepOrder])
   @@index([workflowId])
@@ -207,11 +214,74 @@ model PromptTemplate {
   description  String?    @db.Text
   content      String     @db.Text
   variables    Json?
+  goodExample  String?    @db.Text
+  badExample   String?    @db.Text
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   promptPack   PromptPack @relation(fields: [promptPackId], references: [id], onDelete: Cascade)
+  favorites    PromptTemplateFavorite[]
+  usages       PromptTemplateUsage[]
 
   @@index([promptPackId])
+}
+
+model WorkflowBookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  workflowId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workflowId])
+  @@index([userId])
+  @@index([workflowId])
+}
+
+model WorkflowStepProgress {
+  id           String       @id @default(cuid())
+  userId       String
+  workflowId   String
+  stepId       String
+  isCompleted  Boolean      @default(false)
+  lastVisitedAt DateTime    @default(now())
+  completedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow     Workflow     @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  step         WorkflowStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, stepId])
+  @@index([userId, workflowId])
+  @@index([stepId])
+}
+
+model PromptTemplateFavorite {
+  id               String         @id @default(cuid())
+  userId           String
+  promptTemplateId String
+  createdAt        DateTime       @default(now())
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptTemplate   PromptTemplate @relation(fields: [promptTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, promptTemplateId])
+  @@index([userId])
+  @@index([promptTemplateId])
+}
+
+model PromptTemplateUsage {
+  id               String         @id @default(cuid())
+  userId           String
+  promptTemplateId String
+  actionType       String
+  createdAt        DateTime       @default(now())
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptTemplate   PromptTemplate @relation(fields: [promptTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([promptTemplateId])
+  @@index([actionType])
 }
 
 model Roadmap {

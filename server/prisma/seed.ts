@@ -84,6 +84,9 @@ async function main() {
       content:
         "You are a senior engineer. Break this feature into actionable tasks with acceptance criteria: {feature_description}",
       variables: ["feature_description"],
+      goodExample:
+        "You are a senior engineer. Break this feature into 7 implementation tasks with acceptance criteria, edge cases, and test ideas: Add recurring invoices to the billing module.",
+      badExample: "Help me with billing feature quickly.",
     },
     {
       title: "Refactor Prompt",
@@ -91,6 +94,9 @@ async function main() {
       content:
         "Refactor this code for readability and maintainability without changing behavior. Add tests for critical paths: {code_snippet}",
       variables: ["code_snippet"],
+      goodExample:
+        "Refactor this function for readability and extract reusable helpers. Keep behavior identical and add unit tests for failure paths: {code_snippet}",
+      badExample: "Make this code better: {code_snippet}",
     },
   ];
 
@@ -103,6 +109,8 @@ async function main() {
         description: template.description,
         content: template.content,
         variables: template.variables,
+        goodExample: template.goodExample,
+        badExample: template.badExample,
       },
       create: {
         id: `${promptPack.id}-${template.title.toLowerCase().replace(/\s+/g, "-")}`,
@@ -111,6 +119,8 @@ async function main() {
         description: template.description,
         content: template.content,
         variables: template.variables,
+        goodExample: template.goodExample,
+        badExample: template.badExample,
       },
     });
   }

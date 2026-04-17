@@ -8,10 +8,12 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquareText,
   Plus,
   Settings,
   Target,
   User,
+  Workflow,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -21,6 +23,8 @@ import { UserNav } from "@/components/layout/user-nav";
 
 const USER_NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Workflows", href: "/workflows", icon: Workflow },
+  { label: "Prompt Packs", href: "/prompt-packs", icon: MessageSquareText },
   { label: "Projects", href: "/projects", icon: FolderKanban },
   { label: "Onboarding", href: "/onboarding", icon: Target },
   { label: "Profile", href: "/settings/profile", icon: User },
