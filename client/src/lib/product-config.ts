@@ -27,7 +27,7 @@ export const PRODUCT_CONFIG = {
     workflowLibraryEnabled: true,
     promptPacksEnabled: true,
     roadmapEngineEnabled: true,
-    outputBoosterEnabled: false,
+    outputBoosterEnabled: true,
     teamFeaturesEnabled: false,
     advancedAnalyticsEnabled: false,
     pricingExperimentsEnabled: false,

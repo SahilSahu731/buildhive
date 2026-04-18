@@ -281,6 +281,189 @@ export const trackPromptTemplateUsageAPI = async (
     return response.json();
 };
 
+// Roadmap Engine
+export const getRoadmapsAPI = async () => {
+    const response = await fetch(`${API_URL}/roadmaps`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch roadmaps");
+    }
+
+    return response.json();
+};
+
+export const createRoadmapAPI = async (data: {
+    title?: string;
+    goal: string;
+    durationWeeks?: number;
+    preferredStack?: string;
+    focusAreas?: string[];
+    workflowId?: string;
+}) => {
+    const response = await fetch(`${API_URL}/roadmaps`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create roadmap");
+    }
+
+    return response.json();
+};
+
+export const getRoadmapByIdAPI = async (roadmapId: string) => {
+    const response = await fetch(`${API_URL}/roadmaps/${roadmapId}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch roadmap details");
+    }
+
+    return response.json();
+};
+
+export const setRoadmapTaskCompletionAPI = async (
+    roadmapId: string,
+    taskId: string,
+    isCompleted?: boolean
+) => {
+    const response = await fetch(`${API_URL}/roadmaps/${roadmapId}/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ isCompleted }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update roadmap task");
+    }
+
+    return response.json();
+};
+
+export const generateRoadmapWeekAPI = async (
+    roadmapId: string,
+    data?: {
+        preferredStack?: string;
+        focusAreas?: string[];
+    }
+) => {
+    const response = await fetch(`${API_URL}/roadmaps/${roadmapId}/generate-week`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data || {}),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to generate roadmap week");
+    }
+
+    return response.json();
+};
+
+export const replanRoadmapAPI = async (roadmapId: string) => {
+    const response = await fetch(`${API_URL}/roadmaps/${roadmapId}/replan`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to re-plan roadmap");
+    }
+
+    return response.json();
+};
+
+export const exportRoadmapAPI = async (roadmapId: string, format: "markdown" | "text" = "markdown") => {
+    const response = await fetch(`${API_URL}/roadmaps/${roadmapId}/export?format=${format}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to export roadmap");
+    }
+
+    return response.json();
+};
+
+export const getRoadmapShareCardAPI = async (roadmapId: string) => {
+    const response = await fetch(`${API_URL}/roadmaps/${roadmapId}/share`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch roadmap share data");
+    }
+
+    return response.json();
+};
+
+// Output Booster
+export const analyzeOutputAPI = async (data: {
+    content: string;
+    language?: string;
+    fileName?: string;
+    sourceType?: "paste" | "upload";
+}) => {
+    const response = await fetch(`${API_URL}/output-booster/analyze`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to analyze output");
+    }
+
+    return response.json();
+};
+
+export const getOutputBoosterHistoryAPI = async (limit = 20) => {
+    const response = await fetch(`${API_URL}/output-booster/history?limit=${limit}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to load output booster history");
+    }
+
+    return response.json();
+};
+
+export const compareOutputBoosterRunsAPI = async (runA: string, runB: string) => {
+    const query = new URLSearchParams({ runA, runB });
+    const response = await fetch(`${API_URL}/output-booster/compare?${query.toString()}`, {
+        method: "GET",
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to compare output runs");
+    }
+
+    return response.json();
+};
+
 // Interest System
 export const expressInterestAPI = async (projectId: string, message: string) => {
     const headers = getHeaders();

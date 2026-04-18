@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { createRoadmap, exportRoadmap, generateRoadmapWeek, getRoadmapById, getRoadmapShareCard, getRoadmaps, replanRoadmap, setRoadmapTaskCompletion, } from "../controllers/roadmap.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
+const router = Router();
+router.get("/", authenticate, getRoadmaps);
+router.post("/", authenticate, createRoadmap);
+router.get("/:roadmapId", authenticate, getRoadmapById);
+router.patch("/:roadmapId/tasks/:taskId", authenticate, setRoadmapTaskCompletion);
+router.post("/:roadmapId/generate-week", authenticate, generateRoadmapWeek);
+router.post("/:roadmapId/replan", authenticate, replanRoadmap);
+router.get("/:roadmapId/export", authenticate, exportRoadmap);
+router.get("/:roadmapId/share", authenticate, getRoadmapShareCard);
+export default router;

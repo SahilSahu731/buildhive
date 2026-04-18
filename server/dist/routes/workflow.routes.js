@@ -3,9 +3,9 @@ import { getWorkflowBySlug, getWorkflowResumeStep, getWorkflows, removeWorkflowB
 import { authenticate, optionalAuthenticate } from "../middlewares/auth.middleware.js";
 const router = Router();
 router.get("/", optionalAuthenticate, getWorkflows);
-router.get("/:slug", optionalAuthenticate, getWorkflowBySlug);
 router.get("/id/:workflowId/resume", authenticate, getWorkflowResumeStep);
 router.patch("/id/:workflowId/steps/:stepId", authenticate, setWorkflowStepCompletion);
 router.post("/id/:workflowId/bookmark", authenticate, saveWorkflowBookmark);
 router.delete("/id/:workflowId/bookmark", authenticate, removeWorkflowBookmark);
+router.get("/:slug", optionalAuthenticate, getWorkflowBySlug);
 export default router;

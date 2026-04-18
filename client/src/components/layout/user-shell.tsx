@@ -10,8 +10,10 @@ import {
   Menu,
   MessageSquareText,
   Plus,
+  Rocket,
   Settings,
   Target,
+  Wrench,
   User,
   Workflow,
 } from "lucide-react";
@@ -25,6 +27,8 @@ const USER_NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Workflows", href: "/workflows", icon: Workflow },
   { label: "Prompt Packs", href: "/prompt-packs", icon: MessageSquareText },
+  { label: "Roadmaps", href: "/roadmaps", icon: Rocket },
+  { label: "Output Booster", href: "/output-booster", icon: Wrench },
   { label: "Projects", href: "/projects", icon: FolderKanban },
   { label: "Onboarding", href: "/onboarding", icon: Target },
   { label: "Profile", href: "/settings/profile", icon: User },
@@ -125,7 +129,7 @@ export function UserShell({ children }: { children: React.ReactNode }) {
                       <span className="sr-only">Open menu</span>
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[290px] p-0">
+                  <SheetContent side="left" className="w-72.5 p-0">
                     <SidebarPanel />
                   </SheetContent>
                 </Sheet>

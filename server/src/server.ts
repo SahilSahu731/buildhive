@@ -5,6 +5,8 @@ import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import workflowRoutes from "./routes/workflow.routes.js";
 import promptPackRoutes from "./routes/prompt-pack.routes.js";
+import roadmapRoutes from "./routes/roadmap.routes.js";
+import outputBoosterRoutes from "./routes/output-booster.routes.js";
 
 dotenv.config();
 
@@ -55,6 +57,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/workflows", workflowRoutes);
 app.use("/api/prompt-packs", promptPackRoutes);
+app.use("/api/roadmaps", roadmapRoutes);
+app.use("/api/output-booster", outputBoosterRoutes);
 app.use("/api/interests", interestRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payment", paymentRoutes);
