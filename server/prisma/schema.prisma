@@ -28,6 +28,9 @@ model User {
   timezone       String?
   role           String    @default("user")
   
+  hiveWorkspace HiveWorkspace?
+  hiveSessions HiveSession[]
+
   // Subscription
   plan                   Plan      @default(FREE)
   razorpayCustomerId     String?
@@ -364,4 +367,212 @@ model UsageQuota {
   @@unique([userId, quotaDate, actionType])
   @@index([userId])
   @@index([quotaDate])
+}
+
+// V1 testing product. Legacy tables remain intact during the migration.
+model HiveSession {
+  id String @id
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data Json
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+model HiveWorkspace {
+  id String @id @default(uuid())
+  ownerId String @unique
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name String @default("My workspace")
+  plan String @default("FREE")
+  suspended Boolean @default(false)
+  emailAlerts Boolean @default(true)
+  recoveryAlerts Boolean @default(true)
+  customerId String? @unique
+  subscriptionId String? @unique
+  subscriptionStatus String @default("free")
+  periodEnd DateTime?
+  billingEventAt BigInt @default(0)
+  createdAt DateTime @default(now())
+  projects HiveProject[]
+  usage HiveUsage[]
+  audit HiveAudit[]
+}
+model HiveProject {
+  id String @id @default(uuid())
+  workspaceId String
+  workspace HiveWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name String
+  url String
+  environment String @default("production")
+  status String @default("unverified")
+  verificationToken String @unique
+  verifiedAt DateTime?
+  verificationExpiresAt DateTime
+  webhookSecret String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tests HiveTest[]
+  secrets HiveSecret[]
+  runs HiveRun[]
+  deployments HiveDeployment[]
+  @@index([workspaceId, createdAt])
+}
+model HiveTest {
+  id String @id @default(uuid())
+  projectId String
+  project HiveProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name String
+  description String @default("")
+  status String @default("active")
+  tags String[]
+  currentVersion Int @default(1)
+  deploymentEnabled Boolean @default(false)
+  alertState String @default("healthy")
+  alertRunAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  versions HiveTestVersion[]
+  runs HiveRun[]
+  schedule HiveSchedule?
+  @@index([projectId, status])
+}
+model HiveTestVersion {
+  id String @id @default(uuid())
+  testId String
+  test HiveTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  number Int
+  definition Json
+  createdAt DateTime @default(now())
+  runs HiveRun[]
+  @@unique([testId, number])
+}
+model HiveSecret {
+  id String @id @default(uuid())
+  projectId String
+  project HiveProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name String
+  encryptedValue String
+  updatedAt DateTime @updatedAt
+  @@unique([projectId, name])
+}
+model HiveRun {
+  id String @id @default(uuid())
+  projectId String
+  project HiveProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  testId String
+  test HiveTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  versionId String
+  version HiveTestVersion @relation(fields: [versionId], references: [id])
+  status String @default("queued")
+  trigger String @default("manual")
+  deploymentId String?
+  retryOf String?
+  attempt Int @default(0)
+  targetUrl String
+  testName String
+  environment String
+  createdAt DateTime @default(now())
+  startedAt DateTime?
+  finishedAt DateTime?
+  heartbeatAt DateTime?
+  alertProcessedAt DateTime?
+  durationMs Int?
+  error String?
+  consoleErrors Json @default("[]")
+  networkErrors Json @default("[]")
+  explanation Json?
+  steps HiveRunStep[]
+  artifacts HiveArtifact[]
+  notifications HiveNotification[]
+  @@index([projectId, createdAt])
+  @@index([testId, status, createdAt])
+  @@index([status, heartbeatAt])
+}
+model HiveRunStep {
+  id String @id @default(uuid())
+  runId String
+  run HiveRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  position Int
+  action String
+  status String
+  durationMs Int @default(0)
+  expected String?
+  actual String?
+  error String?
+  @@unique([runId, position])
+}
+model HiveArtifact {
+  id String @id @default(uuid())
+  runId String
+  run HiveRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  kind String
+  path String @unique
+  size Int
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+model HiveSchedule {
+  id String @id @default(uuid())
+  testId String @unique
+  test HiveTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  enabled Boolean @default(true)
+  frequency String @default("daily")
+  hour Int @default(9)
+  timezone String @default("UTC")
+  nextRunAt DateTime
+  lastError String?
+  @@index([enabled, nextRunAt])
+}
+model HiveUsage {
+  id String @id @default(uuid())
+  workspaceId String
+  workspace HiveWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  kind String
+  units Int @default(1)
+  reference String? @unique
+  createdAt DateTime @default(now())
+  @@index([workspaceId, kind, createdAt])
+}
+model HiveNotification {
+  id String @id @default(uuid())
+  runId String
+  run HiveRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  kind String
+  status String @default("pending")
+  attempts Int @default(0)
+  lastAttemptAt DateTime?
+  error String?
+  createdAt DateTime @default(now())
+  @@unique([runId, kind])
+  @@index([status, createdAt])
+}
+model HiveDeployment {
+  id String @id @default(uuid())
+  projectId String
+  project HiveProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  eventId String
+  label String?
+  createdAt DateTime @default(now())
+  @@unique([projectId, eventId])
+}
+model HiveBillingEvent {
+  id String @id
+  createdAt DateTime @default(now())
+}
+model HiveAudit {
+  id String @id @default(uuid())
+  workspaceId String
+  workspace HiveWorkspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  action String
+  resourceId String?
+  createdAt DateTime @default(now())
+  @@index([workspaceId, createdAt])
+}
+
+model HiveServiceHealth {
+  id String @id
+  kind String
+  lastSeenAt DateTime
+  metadata Json
+  @@index([kind, lastSeenAt])
 }

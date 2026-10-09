@@ -12,10 +12,16 @@ passport.use(new GitHubStrategy({
     callbackURL: GITHUB_CALLBACK_URL,
     scope: ['user:email'],
     proxy: true,
+    // passport-oauth2 accepts boolean; passport-github2 has outdated typings.
+    state: true,
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { id, username, profileUrl, photos, emails, _json } = profile;
-        const email = emails?.[0]?.value;
+        const response = await fetch('https://api.github.com/user/emails', { headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(10000) });
+        if (!response.ok)
+            throw new Error('Could not verify GitHub email');
+        const verifiedEmails = await response.json();
+        const email = verifiedEmails.find(e => e.verified && e.primary)?.email;
         const avatar = photos?.[0]?.value;
         const bio = _json?.bio;
         // check if user exists by githubId
@@ -31,6 +37,8 @@ passport.use(new GitHubStrategy({
                 where: { email },
             });
             if (user) {
+                if (!user.emailVerified)
+                    throw new Error("Existing email is not verified; account linking denied");
                 // link account
                 user = await prisma.user.update({
                     where: { email },
@@ -75,9 +83,12 @@ passport.use(new GoogleStrategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET_PLACEHOLDER',
     callbackURL: GOOGLE_CALLBACK_URL,
     proxy: true,
+    state: true,
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { id, displayName, emails, photos } = profile;
+        if (!profile._json?.email_verified)
+            throw new Error('Google email must be verified');
         const email = emails?.[0]?.value;
         const avatar = photos?.[0]?.value;
         // check if user exists by googleId
@@ -93,6 +104,8 @@ passport.use(new GoogleStrategy({
                 where: { email },
             });
             if (user) {
+                if (!user.emailVerified)
+                    throw new Error("Existing email is not verified; account linking denied");
                 // link account
                 user = await prisma.user.update({
                     where: { email },

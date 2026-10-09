@@ -1,12 +1,6 @@
-import { MetadataRoute } from 'next'
- 
-export default function robots(): MetadataRoute.Robots {
+export default function robots() {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: '/admin/',
-    },
-    sitemap: 'https://vibeship.app/sitemap.xml',
-  }
+    rules: { userAgent: "*", allow: "/", disallow: ["/dashboard", "/api"] },
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || "https://buildhive.app"}/sitemap.xml`,
+  };
 }

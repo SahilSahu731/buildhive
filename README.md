@@ -1,123 +1,105 @@
-# vibeship
-> **AI workflow OS for developers to vibe-code faster, ship cleaner output, and keep learning with practical roadmaps.**
+# BuildHive
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+**Automated browser testing for developers who ship.**
 
-## Features
+BuildHive connects verified websites to repeatable Chromium tests. Developers build or review a test plan, execute it in a separate worker, inspect step-level evidence, and schedule recurring checks.
 
-- **AI Code Review**: Get instant, automated code analysis and vulnerability detection using Google Gemini AI.
-- **Project Collaboration**: Create projects, invite team members, and build software together seamlessly.
-- **Developer Portfolio**: Showcase your best work, skills, and contributions with a dedicated professional profile.
-- **Secure Authentication**: Robust login support via GitHub, Google, and Email (powered by Passport.js & JWT).
-- **Pro Memberships**: Integrated subscription handling via Razorpay for premium features.
-- **Modern UI/UX**: Built with Next.js 15, TailwindCSS, and Shadcn UI for a responsive and accessible experience.
-- **Analytics**: Integrated Google Analytics for tracking user engagement.
+## Architecture
 
-## Tech Stack
+- `client/`: Next.js 16, React 19, TypeScript, responsive light/dark UI.
+- `server/`: Express API, existing GitHub/Google OAuth, database-backed HttpOnly sessions.
+- `server/prisma/`: Prisma 6 schema and additive PostgreSQL migrations, compatible with Supabase.
+- `server/src/hive/worker.ts`: independent BullMQ/Redis runner and scheduler.
+- `server/src/hive/egress.ts`: public-HTTPS CONNECT proxy with DNS resolution pinned to each socket.
+- Supabase private Storage: screenshots and traces with authorized, 60-second signed links.
+- Optional Gemini drafting/explanations, SMTP notifications, Razorpay recurring subscriptions.
+- `legacy/`: preserved previous application sources, including the edits present before this refactor. Legacy routes are not mounted.
 
-### Frontend (`/client`)
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS, Shadcn UI, Lucas Lucide Icons
-- **State Management**: React Query (TanStack Query)
-- **Forms**: React Hook Form + Zod
+The original database tables remain in place. The new product uses `Hive*` tables and the existing `User` table. No existing Supabase data was migrated or deleted during development.
 
-### Backend (`/server`)
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: PostgreSQL (via Supabase)
-- **ORM**: Prisma
-- **AI Engine**: Google Gemini API
-- **File Storage**: Cloudinary
-- **Authentication**: Passport.js (OAuth2 + Local)
+## Start locally
 
-## Getting Started
-
-Follow these steps to set up the project locally.
-
-### Prerequisites
-- Node.js (v18 or higher)
-- PostgreSQL Database (Local or Supabase)
-- Cloudinary Account
-- Google Gemini API Key
-- GitHub/Google OAuth Credentials
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/SahilSahu731/buildhive.git
-   cd buildhive
-   ```
-
-2. **Setup Backend**
-   ```bash
-   cd server
-   npm install
-   
-   # Create a .env file based on your configuration
-   # Ensure DATABASE_URL, GEMINI_API_KEY, and OAuth keys are set
-   
-   # Run Database Migrations
-   npx prisma generate
-   npx prisma db push
-   
-   # Start Server
-   npm run dev
-   ```
-
-3. **Setup Frontend**
-   ```bash
-   cd ../client
-   npm install
-   
-   # Create .env.local file
-   # Set NEXT_PUBLIC_API_URL=http://localhost:5000
-   
-   # Start Client
-   npm run dev
-   ```
-
-4. **Visit the App**
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Project Structure
+Use Node 22.12+ (Node 24 also tested), PostgreSQL and Redis.
 
 ```bash
-buildhive/
-├── client/              # Next.js Frontend Application
-│   ├── src/app/         # App Router Pages & Layouts
-│   ├── src/components/  # Reusable UI Components
-│   └── src/lib/         # API Hooks & Utilities
-├── server/              # Express Backend API
-│   ├── src/controllers/ # Request Logic
-│   ├── src/routes/      # API Endpoint Definitions
-│   ├── src/prisma/      # Database Schema
-│   └── src/services/    # AI & Email Services
-└── DEPLOYMENT_GUIDE.md  # PRODUCTION DEPLOYMENT INSTRUCTIONS
+npm ci --prefix server
+npm ci --prefix client
+# If needed, create backing services:
+docker compose up -d
 ```
 
-## Deployment
+Keep your existing `server/.env` OAuth/database values. Compare it with [server/.env.example](server/.env.example) and add the missing variables. Do not overwrite real credentials with example values.
 
-For detailed deployment instructions (Vercel + Render), please refer to the [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) file included in this repository.
+```bash
+npm run check:config
+npm run db:generate
+npm run db:deploy
+cd server
+npx playwright install --with-deps chromium
+cd ..
+```
 
-## Contributing
+For Docker’s local PostgreSQL, both `DATABASE_URL` and `DIRECT_URL` are `postgresql://buildhive:local-development-only@localhost:5432/buildhive`.
 
-Contributions are always welcome!
-1. Fork the repository.
-2. Create `your-feature` branch.
-3. Commit your changes: `git commit -m 'Add some feature'`.
-4. Push to the branch: `git push origin your-feature`.
-5. Open a Pull Request.
+Run these processes in separate terminals:
 
-## License
+```bash
+npm run dev:api                 # API :5000
+npm run dev                    # Web :3000
+npm --prefix server run egress  # Egress proxy :3128
+npm run dev:worker              # Queue, browser execution, schedules, alerts, retention
+```
 
-This project is open sourced under the **MIT License**.
+The client proxies `/api` to the backend; browser requests use same-origin session cookies. For new OAuth registrations, use `http://localhost:3000/api/auth/github/callback` and `/google/callback`. Existing localhost:5000 callbacks also work locally when browser hostnames match. Production callbacks must use the public web origin so the login session cookie remains on that host.
 
----
-**vibeship** — Built by [Sahil Sahu](https://github.com/SahilSahu731)
+## What is implemented
+
+- Public homepage, features, workflow, pricing, documentation, FAQ, login, contact, legal drafts, interactive sample report, metadata and sitemap.
+- Personal workspaces, profiles, notification settings, logout, session revocation, data export and account deletion.
+- Projects with production/staging labels, DNS/file ownership verification, pause/archive/delete, encrypted variables and signed deployment hooks.
+- Manual step editor and optional AI draft review, 12 allowed actions, assertions, desktop/mobile viewport, bounded timeouts, tags, immutable versions, duplicate/pause/delete.
+- Durable run outbox, isolated Chromium contexts, cancellation, global queue concurrency, worker crash recovery, run and browser-time metering.
+- Step timelines, expected/observed diagnostics, screenshots/traces where eligible, private artifact links, previous-pass comparison, optional AI explanations.
+- Real dashboard metrics, searchable/filterable/paginated run history, timezone-aware schedules and failure/recovery alert deduplication.
+- Server-enforced Free/Starter/Growth allowances, Razorpay subscription checkout/cancellation and signed idempotent payment events.
+- Internal user suspension, sanitized job inspection/retry, worker health, storage and AI metering, feedback inbox.
+
+All paid-provider features require real configuration. Manual tests do not require an AI key. The app reports unavailable services instead of manufacturing successful results.
+
+## Validation
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npm test                       # Fast unit checks; integration suites explicitly skip without fixtures
+```
+
+For the full suite, migrate a **separate database whose name contains `test`**, then:
+
+```bash
+TEST_DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/buildhive_test \
+TEST_REDIS_URL=redis://localhost:6379/1 \
+RUN_BROWSER_TESTS=1 npm test
+```
+
+For installed Google Chrome instead of Playwright Chromium, add `PLAYWRIGHT_CHANNEL=chrome`. Test setup overrides database URLs **before imports** and never falls back to your Supabase database. Browser fixtures use synthetic HTML and mocked artifact uploads; they do not send tests to third-party websites.
+
+For interactive UI QA, start a separate web instance:
+
+```bash
+BUILDHIVE_DIST_DIR=.next-qa API_INTERNAL_URL=http://127.0.0.1:5100 \
+npm --prefix client run dev -- --hostname 127.0.0.1 --port 3101
+
+TEST_DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/buildhive_test \
+PLAYWRIGHT_CHANNEL=chrome \
+node --import ./server/node_modules/tsx/dist/loader.mjs infra/qa-ui.mjs
+```
+
+This creates/removes a fixture account, starts a test-only API on :5100, and writes screenshots under ignored `artifacts/qa/`. It never adds a production authentication or domain-verification bypass.
+
+## Production and launch
+
+Read [Setup and deployment](docs/SETUP.md), [Security and operations](docs/OPERATIONS.md), and the [V1 delivery checklist](docs/V1-STATUS.md). Dockerfiles and CI are included. Production browser execution must be deployed behind enforced network restrictions and container resource limits; configuring a proxy URL alone is not a network-isolation guarantee.
+
+The blueprint’s customer interviews, legal approval, external-service provisioning, production deployment, real payment/email/OAuth acceptance tests, backup restoration, load/security review and beta/public launch are external release work. They are not marked complete merely because code exists.

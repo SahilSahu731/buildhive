@@ -1,79 +1,147 @@
-import express from "express";
-import dotenv from "dotenv";
+import "dotenv/config";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
-import authRoutes from "./routes/auth.routes.js";
-import projectRoutes from "./routes/project.routes.js";
-import workflowRoutes from "./routes/workflow.routes.js";
-import promptPackRoutes from "./routes/prompt-pack.routes.js";
-import roadmapRoutes from "./routes/roadmap.routes.js";
-import outputBoosterRoutes from "./routes/output-booster.routes.js";
-
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 4000;
-
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true,
-}));
-app.use(express.json({
-  verify: (req: any, res, buf) => {
-    req.rawBody = buf;
-  }
-}));
-
-import session from 'express-session';
-import passport from './config/passport.js';
-
-// Trust proxy for Render/Vercel
-app.set('trust proxy', 1);
-
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+import session from "express-session";
+import passport from "./config/passport.js";
+import { Prisma } from "@prisma/client";
+import { ZodError } from "zod";
+import prisma from "./lib/prisma.js";
+import { PrismaSessionStore } from "./hive/session.js";
+import { api, route } from "./hive/api.js";
+import { HttpError, workspaceFor } from "./hive/service.js";
+import { frontend } from "./hive/config.js";
+export const app = express();
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)
+  throw new Error("SESSION_SECRET must contain at least 32 characters");
+app.disable("x-powered-by");
+app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS || 1));
+app.use(helmet());
+app.use(cors({ origin: frontend(), credentials: true }));
+app.use(
+  express.json({
+    limit: "128kb",
+    verify: (req, _res, buf) => {
+      (req as Request & { rawBody: Buffer }).rawBody = buf;
+    },
+  }),
+);
+app.use(
+  rateLimit({
+    windowMs: 60000,
+    limit: 180,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+  }),
+);
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'supersecret',
+    name: "buildhive.sid",
+    store: new PrismaSessionStore(),
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    proxy: true, // Required for secure cookies behind proxy
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 86400000,
     },
-  })
+  }),
 );
-
 app.use(passport.initialize());
 app.use(passport.session());
-
-import interestRoutes from "./routes/interest.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import paymentRoutes from "./routes/payment.routes.js";
-import adminRoutes from "./routes/admin.routes.js";
-import feedbackRoutes from "./routes/feedback.routes.js";
-import announcementRoutes from "./routes/announcement.routes.js";
-
-app.use("/api/auth", authRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/workflows", workflowRoutes);
-app.use("/api/prompt-packs", promptPackRoutes);
-app.use("/api/roadmaps", roadmapRoutes);
-app.use("/api/output-booster", outputBoosterRoutes);
-app.use("/api/interests", interestRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/payment", paymentRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/feedback", feedbackRoutes);
-app.use("/api/announcements", announcementRoutes);
-
-app.get("/", (req, res) => {
-  res.send("Server is running");
+// Browser mutations use same-site cookies plus an explicit origin check. Signed webhooks authenticate separately.
+app.use((req, res, next) => {
+  if (
+    !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
+    !req.path.startsWith("/api/webhooks/")
+  ) {
+    if (req.headers.origin !== new URL(frontend()).origin)
+      return res.status(403).json({ message: "Request origin not allowed" });
+  }
+  next();
 });
-
-app.get("/api/health", (req, res) => {
-  res.send("Server is running");
+const authLimiter = rateLimit({
+  windowMs: 15 * 60000,
+  limit: 30,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
 });
-
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+for (const provider of ["github", "google"]) {
+  app.get(
+    `/api/auth/${provider}`,
+    authLimiter,
+    passport.authenticate(provider, {
+      scope: provider === "github" ? ["user:email"] : ["profile", "email"],
+    }),
+  );
+  app.get(
+    `/api/auth/${provider}/callback`,
+    passport.authenticate(provider, {
+      failureRedirect: `${frontend()}/login?error=oauth`,
+    }),
+    route(async (req, res) => {
+      const w = await workspaceFor((req.user as { id: string }).id);
+      const count = await prisma.hiveProject.count({
+        where: { workspaceId: w.id },
+      });
+      res.redirect(
+        `${frontend()}${count ? "/dashboard" : "/dashboard/projects/new"}`,
+      );
+    }),
+  );
+}
+app.post("/api/auth/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    req.session.destroy((err) => {
+      if (err) return next(err);
+      res.clearCookie("buildhive.sid", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+      res.json({ signedOut: true });
+    });
+  });
 });
+app.get(
+  "/api/health",
+  route(async (_req, res) => {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: "ok", service: "buildhive-api" });
+  }),
+);
+app.use("/api", api);
+app.use((_req, res) => res.status(404).json({ message: "Endpoint not found" }));
+app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (error instanceof ZodError)
+    return res
+      .status(422)
+      .json({ message: "Please check your input", issues: error.issues });
+  if (error instanceof HttpError)
+    return res.status(error.status).json({ message: error.message });
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  )
+    return res
+      .status(409)
+      .json({ message: "This record already exists. Refresh and try again." });
+  console.error(
+    JSON.stringify({
+      level: "error",
+      type: error instanceof Error ? error.name : "UnknownError",
+    }),
+  );
+  return res.status(500).json({
+    message:
+      "The request could not be completed. Check service configuration and try again.",
+  });
+});
+if (process.env.NODE_ENV !== "test")
+  app.listen(Number(process.env.PORT || 5000), "0.0.0.0", () =>
+    console.log("BuildHive API listening"),
+  );

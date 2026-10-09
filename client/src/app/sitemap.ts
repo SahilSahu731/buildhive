@@ -1,32 +1,16 @@
-import { MetadataRoute } from 'next'
- 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://vibeship.app';
-
+export default function sitemap() {
   return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/projects`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-        url: `${baseUrl}/signup`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.5,
-      },
-  ]
+    "",
+    "/features",
+    "/how-it-works",
+    "/pricing",
+    "/docs",
+    "/faq",
+    "/contact",
+    "/privacy",
+    "/terms",
+    "/demo",
+  ].map((path) => ({
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://buildhive.app"}${path}`,
+  }));
 }
