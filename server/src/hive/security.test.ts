@@ -70,6 +70,9 @@ describe("secrets and signatures", () => {
       redact("password=cats https://a.test?token=abc Bearer xyz", ["cats"]),
     ).not.toMatch(/cats|abc|xyz/);
   });
+  it("redacts URL-encoded secret values", () => {
+    expect(redact("/a%2Fb%40c", ["a/b@c"])).toBe("/[REDACTED]");
+  });
   it("compares exact signed bytes and rejects malformed signatures", () => {
     const body = '123.{"eventId":"abc"}';
     const sig = createHmac("sha256", "secret").update(body).digest("hex");

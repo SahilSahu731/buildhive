@@ -8,7 +8,13 @@ function storage() {
   return createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
-    { auth: { persistSession: false }, global: { fetch: (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(10000) }) } },
+    {
+      auth: { persistSession: false },
+      global: {
+        fetch: (url, options) =>
+          fetch(url, { ...options, signal: AbortSignal.timeout(10000) }),
+      },
+    },
   ).storage.from(bucket());
 }
 export async function uploadArtifact(

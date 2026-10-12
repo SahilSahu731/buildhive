@@ -3992,5 +3992,22 @@ dialog.modal-backdrop::backdrop {
   max-width: 220px;
 }
 
-.screenshot-preview { margin-top: 16px; }
-.screenshot-preview img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; }
+.screenshot-preview {
+  margin-top: 16px;
+}
+.screenshot-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.user-avatar {
+  overflow: hidden;
+}
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

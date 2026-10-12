@@ -5,6 +5,11 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import session from "express-session";
 import passport from "./config/passport.js";
+import {
+  OAuthError,
+  oauthErrorCode,
+  providerConfigured,
+} from "./config/oauth.js";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 import prisma from "./lib/prisma.js";
@@ -18,6 +23,10 @@ if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)
 app.disable("x-powered-by");
 app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS || 1));
 app.use(helmet());
+app.use("/api", (_req, res, next) => {
+  res.setHeader("Cache-Control", "private, no-store");
+  next();
+});
 app.use(cors({ origin: frontend(), credentials: true }));
 app.use(
   express.json({
@@ -69,29 +78,53 @@ const authLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
 });
-for (const provider of ["github", "google"]) {
+for (const provider of ["github", "google"] as const) {
   app.get(
     `/api/auth/${provider}`,
     authLimiter,
+    route(async (req, res, next) => {
+      // OAuth state uses a host-only cookie. Start on the configured hostname.
+      if (req.hostname !== new URL(frontend()).hostname)
+        return void res.redirect(`${frontend()}/api/auth/${provider}`);
+      if (!providerConfigured(provider)) throw new OAuthError("configuration");
+      // Fail before redirecting if OAuth state or account storage is unavailable.
+      await prisma.hiveSession.findFirst({ select: { id: true } });
+      await prisma.user.findFirst({
+        select: { googleId: true, githubId: true },
+      });
+      next();
+    }),
     passport.authenticate(provider, {
       scope: provider === "github" ? ["user:email"] : ["profile", "email"],
     }),
   );
-  app.get(
-    `/api/auth/${provider}/callback`,
-    passport.authenticate(provider, {
-      failureRedirect: `${frontend()}/login?error=oauth`,
-    }),
-    route(async (req, res) => {
-      const w = await workspaceFor((req.user as { id: string }).id);
-      const count = await prisma.hiveProject.count({
-        where: { workspaceId: w.id },
-      });
-      res.redirect(
-        `${frontend()}${count ? "/dashboard" : "/dashboard/projects/new"}`,
-      );
-    }),
-  );
+  app.get(`/api/auth/${provider}/callback`, authLimiter, (req, res, next) => {
+    passport.authenticate(
+      provider,
+      (error: unknown, user: Express.User | false) => {
+        if (error) return next(error);
+        if (!user)
+          return void res.redirect(
+            `${frontend()}/login?error=${req.query.error === "access_denied" ? "denied" : "state"}`,
+          );
+        req.logIn(user, (error) => {
+          if (error) return next(error);
+          void (async () => {
+            const w = await workspaceFor((user as { id: string }).id);
+            const count = await prisma.hiveProject.count({
+              where: { workspaceId: w.id },
+            });
+            req.session.save((error) => {
+              if (error) return next(error);
+              res.redirect(
+                `${frontend()}${count ? "/dashboard" : "/dashboard/projects/new"}`,
+              );
+            });
+          })().catch(next);
+        });
+      },
+    )(req, res, next);
+  });
 }
 app.post("/api/auth/logout", (req, res, next) => {
   req.logout((err) => {
@@ -117,6 +150,12 @@ app.get(
 app.use("/api", api);
 app.use((_req, res) => res.status(404).json({ message: "Endpoint not found" }));
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (res.headersSent) return _next(error);
+  if (/^\/api\/auth\/(google|github)(\/callback)?$/.test(_req.path)) {
+    const code = oauthErrorCode(error);
+    console.error(JSON.stringify({ level: "error", type: "OAuthError", code }));
+    return res.redirect(`${frontend()}/login?error=${code}`);
+  }
   if (error instanceof ZodError)
     return res
       .status(422)

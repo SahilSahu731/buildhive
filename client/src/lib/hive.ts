@@ -124,6 +124,7 @@ export interface Run {
   explanation?: Explanation;
 }
 export interface Project {
+  stats?: { testId: string; status: string; _count: number }[];
   id: string;
   name: string;
   url: string;

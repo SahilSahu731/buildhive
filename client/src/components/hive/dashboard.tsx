@@ -40,6 +40,7 @@ import {
   duration,
 } from "@/lib/hive";
 import {
+  Avatar,
   Logo,
   ThemeToggle,
   Badge,
@@ -214,9 +215,7 @@ export default function Dashboard() {
             <BookOpen size={17} /> Documentation <ArrowUpRight size={14} />
           </Link>
           <div className="sidebar-user">
-            <div className="user-avatar">
-              {me.user.name?.slice(0, 2).toUpperCase() || "BH"}
-            </div>
+            <Avatar name={me.user.name} src={me.user.image} />
             <div>
               <b>{me.user.name || "Developer"}</b>
               <small>{me.user.email}</small>
@@ -262,9 +261,7 @@ export default function Dashboard() {
             </Link>
             <span className="header-separator" />
             <ThemeToggle />
-            <div className="user-avatar tiny">
-              {me.user.name?.[0]?.toUpperCase() || "B"}
-            </div>
+            <Avatar name={me.user.name} src={me.user.image} tiny />
           </div>
         </header>
         <main id="main-content" className="dashboard-content" key={path}>
@@ -322,7 +319,7 @@ function Overview({ name }: { name: string }) {
         <Stat
           label="Active projects"
           value={data.projects.filter((p) => p.status === "active").length}
-          note={`${data.projects.length} projects in your workspace`}
+          note={`${data.projects.length} ${data.projects.length === 1 ? "project" : "projects"} in your workspace`}
           icon={<Folder size={18} />}
         />
         <Stat
@@ -507,7 +504,7 @@ function ActivityChart({
         .length,
     };
   });
-  const max = Math.max(1, ...buckets.map((b) => b.passed + b.failed));
+  const max = Math.max(2, ...buckets.map((b) => b.passed + b.failed));
   return (
     <div className="activity-chart">
       <div className="chart-scale">
@@ -568,7 +565,8 @@ export function ProjectCard({ project: p }: { project: Project }) {
       <div className="project-card-bottom">
         <span>
           <LayersIcon />
-          {p._count?.tests ?? p.tests?.length ?? 0} tests
+          {p._count?.tests ?? p.tests?.length ?? 0}{" "}
+          {(p._count?.tests ?? p.tests?.length ?? 0) === 1 ? "test" : "tests"}
         </span>
         <span>{p.environment}</span>
         {p.runs?.[0] ? (

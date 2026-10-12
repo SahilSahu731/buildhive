@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-const raw = readFileSync(resolve("server/.env"), "utf8");
+const envPath = resolve("server/.env");
+const raw = existsSync(envPath) ? readFileSync(envPath, "utf8") : "";
 const values = {
   ...Object.fromEntries(
     raw

@@ -6,6 +6,7 @@ export default function sitemap() {
     "/pricing",
     "/docs",
     "/faq",
+    "/changelog",
     "/contact",
     "/privacy",
     "/terms",

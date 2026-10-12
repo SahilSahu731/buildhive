@@ -24,7 +24,7 @@ import {
   Workflow,
   X,
 } from "lucide-react";
-import { Logo, ThemeToggle, Badge, CheckLine } from "./ui";
+import { Logo, ThemeToggle, Badge, CheckLine, Notice } from "./ui";
 export function PublicHeader() {
   const [open, setOpen] = useState(false);
   return (
@@ -86,6 +86,7 @@ export function PublicFooter() {
         <b>Resources</b>
         <Link href="/docs">Documentation</Link>
         <Link href="/faq">FAQ</Link>
+        <Link href="/changelog">Changelog</Link>
         <Link href="/contact">Contact & feedback</Link>
       </div>
       <div>
@@ -682,7 +683,28 @@ export function HowItWorks() {
     </>
   );
 }
-export function Login() {
+const loginErrors: Record<string, string> = {
+  database:
+    "Account storage is temporarily unavailable. Please try again shortly or contact support.",
+  configuration:
+    "This sign-in provider is not configured yet. Please contact support.",
+  state:
+    "Your sign-in session expired or could not be verified. Please start again below.",
+  denied: "Sign-in was cancelled. You can try again whenever you’re ready.",
+  account:
+    "This email belongs to an existing account that could not be linked. Sign in with your original provider or contact support.",
+  email:
+    "A verified email is required. Verify an email with your provider, then try again.",
+  provider:
+    "The sign-in provider could not complete your request. Please try again.",
+  oauth: "Sign-in could not be completed. Please try again.",
+};
+export function Login({ error }: { error?: string }) {
+  const [pending, setPending] = useState<string | null>(null);
+  const signIn = (provider: string) => {
+    setPending(provider);
+    location.assign(new URL(`/api/auth/${provider}`, location.origin).href);
+  };
   return (
     <main className="login-layout">
       <div className="login-story">
@@ -723,21 +745,28 @@ export function Login() {
             starts here.
           </h2>
           <p>Sign in or create your free account.</p>
+          {error && (
+            <Notice message={loginErrors[error] || loginErrors.oauth} />
+          )}
           <button
             className="button github-button"
-            onClick={() =>
-              location.assign(new URL("/api/auth/github", location.origin).href)
-            }
+            disabled={!!pending}
+            onClick={() => signIn("github")}
           >
-            <Github size={20} /> Continue with GitHub
+            <Github size={20} />{" "}
+            {pending === "github"
+              ? "Connecting to GitHub…"
+              : "Continue with GitHub"}
           </button>
           <button
             className="button google-button"
-            onClick={() =>
-              location.assign(new URL("/api/auth/google", location.origin).href)
-            }
+            disabled={!!pending}
+            onClick={() => signIn("google")}
           >
-            <b className="google-g">G</b> Continue with Google
+            <b className="google-g">G</b>{" "}
+            {pending === "google"
+              ? "Connecting to Google…"
+              : "Continue with Google"}
           </button>
           <p className="login-terms">
             By continuing, you agree to our <Link href="/terms">Terms</Link> and

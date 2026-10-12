@@ -359,4 +359,72 @@ integration("authenticated V1 API against PostgreSQL", () => {
       data: { status: "cancelled" },
     });
   });
+  it("stores feedback, includes it in exports and keeps the admin inbox restricted", async () => {
+    expect(
+      (
+        await call("/feedback", "POST", {
+          title: "QA feedback",
+          description: "The report was useful during testing.",
+        })
+      ).status,
+    ).toBe(201);
+    const exported = await call("/me/export");
+    expect(exported.data.feedback).toHaveLength(1);
+    expect((await call("/admin/feedback")).status).toBe(403);
+    await db.user.update({ where: { id: ownerId }, data: { role: "admin" } });
+    expect((await call("/admin/overview")).status).toBe(200);
+    const inbox = await call("/admin/feedback");
+    expect(inbox.status).toBe(200);
+    expect(inbox.data.length).toBeGreaterThan(0);
+    const feedback = await db.feedback.findFirstOrThrow({
+      where: { userId: ownerId },
+    });
+    expect(
+      (
+        await call(`/admin/feedback/${feedback.id}`, "PATCH", {
+          status: "RESOLVED",
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await db.feedback.findUniqueOrThrow({ where: { id: feedback.id } }))
+        .status,
+    ).toBe("RESOLVED");
+    await db.feedback.deleteMany({ where: { userId: ownerId } });
+  });
+  it("deletes completed test history, projects and accounts with billing safeguards", async () => {
+    expect((await call(`/tests/${testId}`, "DELETE")).status).toBe(200);
+    expect(await db.hiveRun.count({ where: { testId } })).toBe(0);
+    expect(
+      (
+        await call(`/projects/${projectId}`, "DELETE", {
+          confirmation: "wrong name",
+        })
+      ).status,
+    ).toBe(400);
+    const project = await db.hiveProject.findUniqueOrThrow({
+      where: { id: projectId },
+    });
+    expect(
+      (
+        await call(`/projects/${projectId}`, "DELETE", {
+          confirmation: project.name,
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await call("/me", "DELETE", { confirmation: "DELETE MY ACCOUNT" }))
+        .status,
+    ).toBe(409);
+    await db.hiveWorkspace.update({
+      where: { id: workspaceId },
+      data: { subscriptionStatus: "cancelled" },
+    });
+    expect(
+      (await call("/me", "DELETE", { confirmation: "DELETE MY ACCOUNT" }))
+        .status,
+    ).toBe(200);
+    expect((await call("/me")).status).toBe(401);
+    expect(await db.hiveSession.count({ where: { userId: ownerId } })).toBe(0);
+  });
 });

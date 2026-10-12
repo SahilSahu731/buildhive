@@ -37,9 +37,9 @@ import { billingClient, handleBilling } from "./billing.js";
 import { sendMail } from "./notifications.js";
 export const api = Router();
 export const route =
-  (fn: (req: Request, res: Response) => Promise<unknown>) =>
+  (fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res)).catch(next);
+    Promise.resolve(fn(req, res, next)).catch(next);
   };
 const param = (req: Request, key = "id") => String(req.params[key]);
 const owner = (req: Request) => (req.user as User).id;
@@ -242,6 +242,13 @@ api.get(
       exportedAt: new Date(),
       user: { name: (req.user as User).name, email: (req.user as User).email },
       projects,
+      feedback: await prisma.feedback.findMany({
+        where: { userId: owner(req) },
+      }),
+      preferences: {
+        emailAlerts: w.emailAlerts,
+        recoveryAlerts: w.recoveryAlerts,
+      },
       usage: await usageFor(w),
     });
   }),
@@ -272,22 +279,23 @@ api.delete(
         "Cancel your subscription before deleting your account",
       );
     await locked(w.id, async (tx) => {
-    const active = await tx.hiveRun.count({
-      where: {
-        project: { workspaceId: w.id },
-        status: { in: ["queued", "preparing", "running"] },
-      },
-    });
-    if (active)
-      throw new HttpError(
-        409,
-        "Cancel active runs before deleting your account",
-      );
-    const artifacts = await tx.hiveArtifact.findMany({
-      where: { run: { project: { workspaceId: w.id } } },
-    });
-    await removeArtifacts(artifacts.map((a) => a.path));
-    await tx.user.delete({ where: { id: owner(req) } });
+      const active = await tx.hiveRun.count({
+        where: {
+          project: { workspaceId: w.id },
+          status: { in: ["queued", "preparing", "running"] },
+        },
+      });
+      if (active)
+        throw new HttpError(
+          409,
+          "Cancel active runs before deleting your account",
+        );
+      const artifacts = await tx.hiveArtifact.findMany({
+        where: { run: { project: { workspaceId: w.id } } },
+      });
+      await removeArtifacts(artifacts.map((a) => a.path));
+      await tx.feedback.deleteMany({ where: { userId: owner(req) } });
+      await tx.user.delete({ where: { id: owner(req) } });
     });
     req.session.destroy(() => {});
     res.json({ deleted: true });
@@ -416,6 +424,15 @@ api.get(
   route(async (req, res) => {
     const w = await workspace(req);
     await requireProject(w.id, param(req));
+    const stats = await prisma.hiveRun.groupBy({
+      by: ["testId", "status"],
+      where: {
+        projectId: param(req),
+        createdAt: { gte: new Date(Date.now() - 30 * 86400000) },
+        status: { in: ["passed", "failed", "timed_out"] },
+      },
+      _count: true,
+    });
     res.json(
       await prisma.hiveProject
         .findUnique({
@@ -439,6 +456,7 @@ api.get(
                 ...p,
                 webhookSecret: undefined,
                 webhookConfigured: !!p.webhookSecret,
+                stats,
               }
             : null,
         ),
@@ -504,20 +522,20 @@ api.delete(
     if (req.body.confirmation !== p.name)
       throw new HttpError(400, "Enter the project name to delete it");
     await locked(w.id, async (tx) => {
-    if (
-      await tx.hiveRun.count({
-        where: {
-          projectId: p.id,
-          status: { in: ["queued", "preparing", "running"] },
-        },
-      })
-    )
-      throw new HttpError(409, "Cancel active runs first");
-    const artifacts = await tx.hiveArtifact.findMany({
-      where: { run: { projectId: p.id } },
-    });
-    await removeArtifacts(artifacts.map((a) => a.path));
-    await tx.hiveProject.delete({ where: { id: p.id } });
+      if (
+        await tx.hiveRun.count({
+          where: {
+            projectId: p.id,
+            status: { in: ["queued", "preparing", "running"] },
+          },
+        })
+      )
+        throw new HttpError(409, "Cancel active runs first");
+      const artifacts = await tx.hiveArtifact.findMany({
+        where: { run: { projectId: p.id } },
+      });
+      await removeArtifacts(artifacts.map((a) => a.path));
+      await tx.hiveProject.delete({ where: { id: p.id } });
     });
     await audit(w.id, "project.deleted", p.id);
     res.json({ deleted: true });
@@ -563,21 +581,27 @@ api.post(
     }
     if (!valid) throw new HttpError(422, "Verification token does not match");
     const verified = await locked(w.id, async (tx) => {
-      const current = await tx.hiveProject.findUnique({where: {id: p.id}});
+      const current = await tx.hiveProject.findUnique({ where: { id: p.id } });
       if (!current) throw new HttpError(404, "Project not found");
       if (current.status === "archived") {
-        const count = await tx.hiveProject.count({where: {workspaceId: w.id, status: {not: "archived"}}});
-        if (count >= planFor(effectivePlan(w)).projects) throw new HttpError(402, "Project limit reached. Archive another project or upgrade.");
+        const count = await tx.hiveProject.count({
+          where: { workspaceId: w.id, status: { not: "archived" } },
+        });
+        if (count >= planFor(effectivePlan(w)).projects)
+          throw new HttpError(
+            402,
+            "Project limit reached. Archive another project or upgrade.",
+          );
       }
-    return tx.hiveProject.updateMany({
-      where: {
-        id: p.id,
-        url: p.url,
-        verificationToken: p.verificationToken,
-        verificationExpiresAt: { gt: new Date() },
-      },
-      data: { verifiedAt: new Date(), status: "active" },
-    });
+      return tx.hiveProject.updateMany({
+        where: {
+          id: p.id,
+          url: p.url,
+          verificationToken: p.verificationToken,
+          verificationExpiresAt: { gt: new Date() },
+        },
+        data: { verifiedAt: new Date(), status: "active" },
+      });
     });
     if (!verified.count)
       throw new HttpError(
@@ -707,20 +731,20 @@ api.delete(
     const w = await workspace(req);
     const t = await requireTest(w.id, param(req));
     await locked(w.id, async (tx) => {
-    if (
-      await tx.hiveRun.count({
-        where: {
-          testId: t.id,
-          status: { in: ["queued", "preparing", "running"] },
-        },
-      })
-    )
-      throw new HttpError(409, "Cancel active runs first");
-    const artifacts = await tx.hiveArtifact.findMany({
-      where: { run: { testId: t.id } },
-    });
-    await removeArtifacts(artifacts.map((a) => a.path));
-    await tx.hiveTest.delete({ where: { id: t.id } });
+      if (
+        await tx.hiveRun.count({
+          where: {
+            testId: t.id,
+            status: { in: ["queued", "preparing", "running"] },
+          },
+        })
+      )
+        throw new HttpError(409, "Cancel active runs first");
+      const artifacts = await tx.hiveArtifact.findMany({
+        where: { run: { testId: t.id } },
+      });
+      await removeArtifacts(artifacts.map((a) => a.path));
+      await tx.hiveTest.delete({ where: { id: t.id } });
     });
     res.json({ deleted: true });
   }),
@@ -859,7 +883,12 @@ api.get(
       },
     });
     if (!a) throw new HttpError(404, "Artifact not found or expired");
-    res.json({ url: await signedArtifact(a.path, !(req.query.preview === "1" && a.kind === "screenshot")) });
+    res.json({
+      url: await signedArtifact(
+        a.path,
+        !(req.query.preview === "1" && a.kind === "screenshot"),
+      ),
+    });
   }),
 );
 api.put(
@@ -971,7 +1000,10 @@ api.post(
       where: { projectId: p.id },
       select: { name: true, encryptedValue: true },
     });
-    const safePrompt = redact(input.prompt, secrets.map((secret) => decrypt(secret.encryptedValue)));
+    const safePrompt = redact(
+      input.prompt,
+      secrets.map((secret) => decrypt(secret.encryptedValue)),
+    );
     await reserveAI(w);
     const result = await askAI(
       draftInstructions,
@@ -1164,6 +1196,11 @@ api.get(
       workers,
       aiMetering,
       feedbackCount,
+      workspacesWithProjects,
+      verifiedWorkspaces,
+      activatedWorkspaces,
+      monitoredWorkspaces,
+      suspendedWorkspaces,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.hiveWorkspace.count({
@@ -1193,6 +1230,34 @@ api.get(
         _sum: { units: true },
       }),
       prisma.feedback.count({ where: { status: "OPEN" } }),
+      prisma.hiveWorkspace.count({ where: { projects: { some: {} } } }),
+      prisma.hiveWorkspace.count({
+        where: { projects: { some: { verifiedAt: { not: null } } } },
+      }),
+      prisma.hiveWorkspace.count({
+        where: {
+          projects: {
+            some: {
+              runs: {
+                some: { status: { in: ["passed", "failed", "timed_out"] } },
+              },
+            },
+          },
+        },
+      }),
+      prisma.hiveWorkspace.count({
+        where: {
+          projects: {
+            some: {
+              status: "active",
+              tests: {
+                some: { status: "active", schedule: { enabled: true } },
+              },
+            },
+          },
+        },
+      }),
+      prisma.hiveWorkspace.count({ where: { suspended: true } }),
     ]);
     res.json({
       users,
@@ -1201,9 +1266,19 @@ api.get(
       storageBytes: storage._sum.size || 0,
       aiRequests: ai._sum.units || 0,
       notifications,
-      workers: workers.map((worker) => ({ ...worker, healthy: Date.now() - worker.lastSeenAt.getTime() < 30000 })),
+      workers: workers.map((worker) => ({
+        ...worker,
+        healthy: Date.now() - worker.lastSeenAt.getTime() < 30000,
+      })),
       aiMetering,
       feedbackCount,
+      activation: {
+        workspacesWithProjects,
+        verifiedWorkspaces,
+        activatedWorkspaces,
+        monitoredWorkspaces,
+      },
+      suspendedWorkspaces,
     });
   }),
 );

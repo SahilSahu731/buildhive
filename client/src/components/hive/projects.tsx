@@ -186,6 +186,22 @@ export function ProjectDetail({
   if (loading) return <Loading />;
   if (!p) return <Notice message={error} />;
   const tests = p.tests || [];
+  const completed = p.stats?.reduce((sum, row) => sum + row._count, 0) || 0;
+  const passed =
+    p.stats
+      ?.filter((row) => row.status === "passed")
+      .reduce((sum, row) => sum + row._count, 0) || 0;
+  const frequentFailures = tests
+    .map((test) => ({
+      test,
+      failures:
+        p.stats
+          ?.filter((row) => row.testId === test.id && row.status !== "passed")
+          .reduce((sum, row) => sum + row._count, 0) || 0,
+    }))
+    .filter((item) => item.failures)
+    .sort((a, b) => b.failures - a.failures)
+    .slice(0, 3);
   return (
     <>
       <Link className="back-link" href="/dashboard/projects">
@@ -238,7 +254,7 @@ export function ProjectDetail({
       ) : (
         <>
           {tab === "overview" && (
-            <div className="stat-grid three">
+            <div className="stat-grid">
               <Stat
                 label="Saved tests"
                 value={tests.length}
@@ -262,12 +278,38 @@ export function ProjectDetail({
                 icon={<Play size={18} />}
               />
               <Stat
+                label="Test pass rate"
+                value={
+                  completed
+                    ? `${((passed / completed) * 100).toFixed(1)}%`
+                    : "—"
+                }
+                note="Completed tests · last 30 days"
+                icon={<CheckCheck size={18} />}
+              />
+              <Stat
                 label="Scheduled checks"
                 value={tests.filter((t) => t.schedule?.enabled).length}
                 note="Enabled monitoring schedules"
                 icon={<Clock size={18} />}
               />
             </div>
+          )}
+          {tab === "overview" && frequentFailures.length > 0 && (
+            <section className="panel form-section">
+              <h2>Frequently failing tests</h2>
+              <p className="muted">
+                Recorded failures and timeouts in the last 30 days.
+              </p>
+              {frequentFailures.map(({ test, failures }) => (
+                <div className="provider-row" key={test.id}>
+                  <Link href={`${root}/tests/${test.id}`}>{test.name}</Link>
+                  <Badge
+                    status={`${failures} ${failures === 1 ? "failure" : "failures"}`}
+                  />
+                </div>
+              ))}
+            </section>
           )}
           <section className="panel">
             <div className="panel-head">
@@ -1804,14 +1846,48 @@ function ExplanationView({ explanation: e }: { explanation: Explanation }) {
   );
 }
 
-function ScreenshotPreview({run}: {run: Run}) {
+function ScreenshotPreview({ run }: { run: Run }) {
   const shot = run.artifacts?.find((item) => item.kind === "screenshot");
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   if (!shot) return <p className="muted">No screenshot available.</p>;
-  return <div className="screenshot-preview">
-    {url ? <Image src={url} width={1280} height={800} unoptimized alt={`Browser screenshot from ${run.status} run ${run.id.slice(0,8)}`} onError={() => {setUrl("");setError("The image link expired or could not load. Try again.");}} /> : <Button busy={busy} onClick={async () => {setBusy(true);setError("");try {const result = await api<{url:string}>(`/artifacts/${shot.id}?preview=1`);setUrl(result.url);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>View screenshot</Button>}
-    {error && <Notice message={error} />}
-  </div>;
+  return (
+    <div className="screenshot-preview">
+      {url ? (
+        <Image
+          src={url}
+          width={1280}
+          height={800}
+          unoptimized
+          alt={`Browser screenshot from ${run.status} run ${run.id.slice(0, 8)}`}
+          onError={() => {
+            setUrl("");
+            setError("The image link expired or could not load. Try again.");
+          }}
+        />
+      ) : (
+        <Button
+          busy={busy}
+          onClick={async () => {
+            setBusy(true);
+            setError("");
+            try {
+              const result = await api<{ url: string }>(
+                `/artifacts/${shot.id}?preview=1`,
+              );
+              setUrl(result.url);
+            } catch (e) {
+              setError((e as Error).message);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          View screenshot
+        </Button>
+      )}
+      {error && <Notice message={error} />}
+    </div>
+  );
 }

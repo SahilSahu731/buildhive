@@ -143,7 +143,9 @@ export function validSignature(
 }
 export function redact(input: string, values: string[] = []) {
   let result = input;
-  for (const secret of [...new Set(values.flatMap((value) => [value, encodeURIComponent(value)]))]
+  for (const secret of [
+    ...new Set(values.flatMap((value) => [value, encodeURIComponent(value)])),
+  ]
     .filter(Boolean)
     .sort((a, b) => b.length - a.length))
     result = result.split(secret).join("[REDACTED]");

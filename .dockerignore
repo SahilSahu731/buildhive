@@ -1,8 +1,10 @@
 **/node_modules
 **/.next
+**/.next-qa
+**/.next-dev
 **/dist
 **/.env
-**/.env.local
+**/.env.*
 .git
 legacy
 artifacts

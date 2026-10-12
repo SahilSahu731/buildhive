@@ -1,37 +1,38 @@
+import "dotenv/config";
 import passport from "passport";
-import { Strategy as GitHubStrategy } from "passport-github2";
+import {
+  Strategy as GitHubStrategy,
+  type Profile as GitHubProfile,
+} from "passport-github2";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import prisma from "../lib/prisma.js";
-import dotenv from "dotenv";
-import { User } from "@prisma/client";
+import { resolveOAuthUser } from "./oauth.js";
+import { PersistedOAuthState } from "./oauth-state.js";
+import { frontend } from "../hive/config.js";
 
-dotenv.config();
-
-const SERVER_URL = process.env.SERVER_URL || "http://localhost:5000";
-const GITHUB_CALLBACK_URL =
-  process.env.GITHUB_CALLBACK_URL || `${SERVER_URL}/api/auth/github/callback`;
-const GOOGLE_CALLBACK_URL =
-  process.env.GOOGLE_CALLBACK_URL || `${SERVER_URL}/api/auth/google/callback`;
-
+const publicUrl = frontend();
 passport.use(
   new GitHubStrategy(
     {
       clientID: process.env.GITHUB_CLIENT_ID || "GITHUB_CLIENT_ID_PLACEHOLDER",
       clientSecret:
         process.env.GITHUB_CLIENT_SECRET || "GITHUB_CLIENT_SECRET_PLACEHOLDER",
-      callbackURL: GITHUB_CALLBACK_URL,
+      callbackURL:
+        process.env.GITHUB_CALLBACK_URL ||
+        `${publicUrl}/api/auth/github/callback`,
       scope: ["user:email"],
       proxy: true,
       // passport-oauth2 accepts boolean; passport-github2 has outdated typings.
       state: true as unknown as string,
+      store: new PersistedOAuthState("github"),
     },
     async (
       accessToken: string,
-      refreshToken: string,
-      profile: any,
-      done: (error: any, user?: any) => void,
+      _refreshToken: string,
+      profile: GitHubProfile,
+      done: (error: unknown, user?: Express.User) => void,
     ) => {
       try {
-        const { id, username, profileUrl, photos, emails, _json } = profile;
         const response = await fetch("https://api.github.com/user/emails", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -40,173 +41,73 @@ passport.use(
           signal: AbortSignal.timeout(10000),
         });
         if (!response.ok) throw new Error("Could not verify GitHub email");
-        const verifiedEmails = (await response.json()) as {
+        const emails = (await response.json()) as {
           email: string;
           verified: boolean;
           primary: boolean;
         }[];
-        const email = verifiedEmails.find(
-          (e) => e.verified && e.primary,
-        )?.email;
-        const avatar = photos?.[0]?.value;
-        const bio = _json?.bio;
-
-        // check if user exists by githubId
-        let user = await prisma.user.findUnique({
-          where: { githubId: id },
-        });
-
-        if (user) {
-          return done(null, user);
-        }
-
-        // check if user already exists with email
-        if (email) {
-          user = await prisma.user.findUnique({
-            where: { email },
-          });
-
-          if (user) {
-            if (!user.emailVerified)
-              throw new Error(
-                "Existing email is not verified; account linking denied",
-              );
-            // link account
-            user = await prisma.user.update({
-              where: { email },
-              data: {
-                githubId: id,
-                githubUsername: username,
-                githubUrl: profileUrl,
-                // Only update image if not set
-                image: user.image ? undefined : avatar,
-              },
-            });
-            return done(null, user);
-          }
-        }
-
-        // Create new user
-        // Note: Email is required field in schema. If GitHub doesn't provide email (private), we might have issues.
-        // Usually GitHub provides a noreply email if private, or we fail.
-        if (!email) {
-          return done(new Error("Email is required from GitHub"), undefined);
-        }
-
-        user = await prisma.user.create({
-          data: {
-            githubId: id,
-            githubUsername: username,
-            email: email,
-            name: profile.displayName || username,
-            image: avatar,
-            githubUrl: profileUrl,
-            bio: bio,
-            emailVerified: true,
-          },
-        });
-
-        return done(null, user);
+        const email =
+          emails.find((e) => e.verified && e.primary) ||
+          emails.find((e) => e.verified);
+        done(
+          null,
+          await resolveOAuthUser({
+            provider: "github",
+            id: profile.id,
+            email: email?.email,
+            verified: !!email,
+            name: profile.displayName || profile.username,
+            image: profile.photos?.[0]?.value,
+            githubUsername: profile.username,
+            githubUrl: profile.profileUrl,
+            bio: (profile as GitHubProfile & { _json?: { bio?: string } })._json
+              ?.bio,
+          }),
+        );
       } catch (error) {
-        return done(error, undefined);
+        done(error);
       }
     },
   ),
 );
-
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || "GOOGLE_CLIENT_ID_PLACEHOLDER",
       clientSecret:
         process.env.GOOGLE_CLIENT_SECRET || "GOOGLE_CLIENT_SECRET_PLACEHOLDER",
-      callbackURL: GOOGLE_CALLBACK_URL,
+      callbackURL:
+        process.env.GOOGLE_CALLBACK_URL ||
+        `${publicUrl}/api/auth/google/callback`,
       proxy: true,
       state: true,
+      store: new PersistedOAuthState("google"),
     },
-    async (
-      accessToken: string,
-      refreshToken: string,
-      profile: any,
-      done: (error: any, user?: any) => void,
-    ) => {
+    async (_accessToken, _refreshToken, profile, done) => {
       try {
-        const { id, displayName, emails, photos } = profile;
-        if (!profile._json?.email_verified)
-          throw new Error("Google email must be verified");
-        const email = emails?.[0]?.value;
-        const avatar = photos?.[0]?.value;
-
-        // check if user exists by googleId
-        let user = await prisma.user.findUnique({
-          where: { googleId: id },
-        });
-
-        if (user) {
-          return done(null, user);
-        }
-
-        // check if user already exists with email
-        if (email) {
-          user = await prisma.user.findUnique({
-            where: { email },
-          });
-
-          if (user) {
-            if (!user.emailVerified)
-              throw new Error(
-                "Existing email is not verified; account linking denied",
-              );
-            // link account
-            user = await prisma.user.update({
-              where: { email },
-              data: {
-                googleId: id,
-                // Only update image if not set
-                image: user.image ? undefined : avatar,
-              },
-            });
-            return done(null, user);
-          }
-        }
-
-        if (!email) {
-          return done(new Error("Email is required from Google"), undefined);
-        }
-
-        // Create new user
-        user = await prisma.user.create({
-          data: {
-            googleId: id,
-            email: email,
-            name: displayName,
-            image: avatar,
-            emailVerified: true,
-          },
-        });
-
-        return done(null, user);
+        done(
+          null,
+          await resolveOAuthUser({
+            provider: "google",
+            id: profile.id,
+            email: profile.emails?.[0]?.value,
+            verified: profile._json.email_verified === true,
+            name: profile.displayName,
+            image: profile.photos?.[0]?.value,
+          }),
+        );
       } catch (error) {
-        return done(error, undefined);
+        done(error);
       }
     },
   ),
 );
-
-// Serialization
-passport.serializeUser((user: any, done) => {
-  done(null, user.id);
-});
-
+passport.serializeUser((user, done) => done(null, (user as { id: string }).id));
 passport.deserializeUser(async (id: string, done) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
-    done(null, user);
-  } catch (err) {
-    done(err, null);
+    done(null, (await prisma.user.findUnique({ where: { id } })) || false);
+  } catch (error) {
+    done(error);
   }
 });
-
 export default passport;

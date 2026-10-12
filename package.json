@@ -12,7 +12,10 @@
     "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
     "db:generate": "npm --prefix server run prisma:generate",
     "db:deploy": "npm --prefix server run db:deploy",
-    "check:config": "node infra/check-config.mjs"
+    "check:config": "node infra/check-config.mjs",
+    "doctor:auth": "node infra/doctor-auth.mjs"
   },
-  "engines": {"node": ">=22.12"}
+  "engines": {
+    "node": ">=22.12"
+  }
 }

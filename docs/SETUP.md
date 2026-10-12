@@ -2,7 +2,7 @@
 
 ## Your existing credentials
 
-The existing Google/GitHub OAuth client IDs and secrets and PostgreSQL URLs were preserved. Their presence was checked without exposing values. The actual provider callbacks have not been completed on your behalf.
+The existing Google/GitHub OAuth client IDs and secrets were preserved. On 12 October 2026, both Supabase URLs connected successfully. The existing four legacy migrations were verified and baselined, then the eight missing additive migrations were applied without resetting the database. `npm run doctor:auth` now passes, and the running website's Google/GitHub entry routes persist sessions and redirect to their providers. Real provider consent callbacks still require live acceptance.
 
 Your current `.env` has placeholder/missing values for the services below. Run `npm run check:config` for an updated presence-only report.
 
@@ -25,7 +25,7 @@ Never place database passwords, OAuth secrets, the encryption key or Supabase se
 1. Use the project’s connection details from Supabase. Runtime can use the transaction pooler with `pgbouncer=true`; migrations must use a direct or session-pooler URL. Preserve TLS (`sslmode=require`).
 2. Back up the database before production migration.
 3. Run `npm run db:deploy` from the repository root with the intended database environment.
-4. New testing tables enable RLS without browser-client policies. The API connects as the privileged server role and enforces workspace ownership on every request. Do not expose a privileged role to browsers.
+4. New testing tables and the existing account/feedback tables enable RLS without new browser-client policies. Review pre-existing Supabase policies and grants. The API connects as the privileged server role and enforces workspace ownership on every request. Do not expose a privileged role to browsers.
 5. Create a **private** `buildhive-artifacts` bucket. `node infra/setup-storage.mjs` creates or updates it using `server/.env`; run this only against the intended Supabase project.
 6. Verify upload, authenticated access, expiration and deletion with a real run in staging. Artifact cleanup runs in the worker.
 
@@ -45,6 +45,19 @@ GOOGLE_CALLBACK_URL=https://your-buildhive-domain.example/api/auth/google/callba
 ```
 
 Register the same exact callbacks in both OAuth provider consoles. GitHub needs only `user:email`; Google needs profile/email. OAuth state is stored in PostgreSQL sessions. Sessions are HttpOnly, SameSite=Lax and Secure in production. Set `TRUST_PROXY_HOPS` to your actual trusted proxy topology; do not expose an API that blindly trusts arbitrary forwarding headers.
+
+### Diagnose login failures
+
+Run `npm run doctor:auth` from the repository root. It checks credential presence, callback hostname consistency, both PostgreSQL connections and required account/session tables. It performs read-only queries and prints no credential values. A presence check alone (`check:config`) cannot detect invalid database URLs or provider credentials.
+
+- **Database / tenant or user not found:** copy both connection strings from the correct Supabase project. `DATABASE_URL` uses the transaction pooler; `DIRECT_URL` uses the session pooler or direct connection. Keep the supplied region, host and username together; encode special password characters and retain TLS. See [Supabase’s diagnosis](https://supabase.com/docs/guides/troubleshooting/tenant-or-user-not-found).
+- **Missing table:** review/apply the migrations with `npm run db:deploy` against the intended database. Do not reset an existing database.
+- **Provider configuration:** register exactly the callback URL printed by the doctor in the corresponding Google/GitHub app. Keep the callback hostname identical to the frontend hostname. Local ports can differ; `localhost` and `127.0.0.1` cannot share host-only cookies. Existing explicit local callbacks on port 5000 remain supported.
+- **Expired sign-in:** restart from `/login`. State expires after ten minutes, is saved before redirecting, and is consumed atomically once. Old callbacks and concurrent replays are rejected.
+- **Account cannot be linked:** use the original sign-in provider. Automatic linking requires a verified email on both sides, and cannot replace an existing provider identity. Unverified legacy accounts require a separate ownership recovery process.
+- **Google consent restrictions / redirect mismatch:** check the exact registered URI and authorized test users in your Google OAuth app. Client-secret acceptance can only be confirmed through a real consent callback; the doctor does not claim to validate it.
+
+The login page displays a recoverable message for these failures. Backend logs record an error category without tokens or raw connection strings. OAuth success rotates the session and saves it before returning to the dashboard.
 
 ## Queue and browser worker
 
@@ -83,7 +96,7 @@ Webhook events are authenticated using the raw request bytes, idempotent event I
 
 ## Deploy and operate
 
-Build from repository root using `infra/Dockerfile.web`, `.api`, and `.worker`. The API Dockerfile can also run `node dist/hive/egress.js` as the separate proxy service. Supply production secrets through the hosting secret store. Do not bake `.env` files into images.
+Build from repository root using `infra/Dockerfile.web`, `.api`, and `.worker`. The API Dockerfile can also run `node dist/hive/egress.js` as the separate proxy service. Supply production secrets through the hosting secret store. Do not bake `.env` files into images. The Docker build context excludes them; if deploying a local standalone build by hand, inspect its contents because Next may trace local environment files.
 
 Apply migrations as a controlled release step before rolling out API/worker code. Configure private service networking, TLS/public DNS, backup retention, infrastructure logs, CPU/memory limits and alerts. Promote one existing trusted user by setting `User.role` to `admin` in a controlled database session; there is no public admin-registration route.
 

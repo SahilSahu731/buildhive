@@ -42,3 +42,19 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Browser UI acceptance
+        run: |
+          BUILDHIVE_DIST_DIR=.next-qa API_INTERNAL_URL=http://127.0.0.1:5100 npm --prefix client run dev -- --hostname 127.0.0.1 --port 3101 > /tmp/buildhive-ui.log 2>&1 &
+          web_pid=$!
+          trap 'kill "$web_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:3101/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node --import ./server/node_modules/tsx/dist/loader.mjs infra/qa-ui.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buildhive-ui-screenshots
+          path: artifacts/qa/
+          if-no-files-found: ignore

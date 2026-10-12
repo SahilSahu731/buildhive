@@ -51,4 +51,4 @@ export function effectivePlan(w: {
     : "FREE";
 }
 export const frontend = () =>
-  process.env.FRONTEND_URL || "http://localhost:3000";
+  new URL(process.env.FRONTEND_URL || "http://localhost:3000").origin;

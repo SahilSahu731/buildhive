@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 COPY server/package*.json ./
 COPY server/prisma ./prisma
 COPY server/prisma.config.ts ./
-RUN npm ci --ignore-scripts
+RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY server/tsconfig.json ./
 COPY server/src ./src
 RUN npx prisma generate && npx tsc

@@ -257,11 +257,15 @@ export async function executeRun(id: string) {
     });
     page.on("requestfailed", (req) => {
       if (network.length < 30)
-        network.push(`${req.method()} ${redact(safeUrl(req.url()), secretValues)} • request failed`);
+        network.push(
+          `${req.method()} ${redact(safeUrl(req.url()), secretValues)} • request failed`,
+        );
     });
     page.on("response", (res) => {
       if (res.status() >= 400 && network.length < 30)
-        network.push(`${res.status()} ${redact(safeUrl(res.url()), secretValues)}`);
+        network.push(
+          `${res.status()} ${redact(safeUrl(res.url()), secretValues)}`,
+        );
     });
     timer = setTimeout(() => {
       timedOut = true;
@@ -319,7 +323,11 @@ export async function executeRun(id: string) {
           error: stepError,
         },
       });
-      if ((stepError || position === d.steps.length - 1) && canCapture && !page.isClosed())
+      if (
+        (stepError || position === d.steps.length - 1) &&
+        canCapture &&
+        !page.isClosed()
+      )
         try {
           const filename = stepError ? "failure.png" : "result.png";
           const file = join(dir, filename);

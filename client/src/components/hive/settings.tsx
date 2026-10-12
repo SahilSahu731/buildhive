@@ -547,6 +547,8 @@ export function Billing() {
   );
 }
 interface AdminStats {
+  activation: Record<string, number>;
+  suspendedWorkspaces: number;
   users: number;
   subscriptions: number;
   jobs: { status: string; _count: number }[];
@@ -648,18 +650,31 @@ function AdminOverview() {
         />
       </div>
       <section className="panel form-section">
+        <h2>Customer activation</h2>
+        <p className="muted">
+          Current account totals derived from product records. No advertising
+          cookies or third-party tracking scripts.
+        </p>
+        {Object.entries({
+          workspacesWithProjects: "Created a project",
+          verifiedWorkspaces: "Verified a domain",
+          activatedWorkspaces: "Completed a browser test",
+          monitoredWorkspaces: "Enabled monitoring",
+        }).map(([key, label]) => (
+          <div className="provider-row" key={key}>
+            <span>{label}</span>
+            <b>{data.activation[key]}</b>
+          </div>
+        ))}
+        <p className="muted">
+          Suspended workspaces: {data.suspendedWorkspaces}
+        </p>
         <h2>Worker health</h2>
         {data.workers.length ? (
           data.workers.map((w) => (
             <div className="provider-row" key={w.id}>
               <code>{w.id.slice(0, 20)}</code>
-              <Badge
-                status={
-                  w.healthy
-                    ? "active"
-                    : "offline"
-                }
-              />
+              <Badge status={w.healthy ? "active" : "offline"} />
               <small>
                 Last heartbeat {date(w.lastSeenAt)} · {w.metadata.waiting || 0}{" "}
                 waiting · {w.metadata.active || 0} active

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef, ReactNode } from "react";
 import {
   Hexagon,
@@ -242,5 +243,34 @@ export function Confirm({
         </div>
       </section>
     </dialog>
+  );
+}
+
+export function Avatar({
+  name,
+  src,
+  tiny = false,
+}: {
+  name?: string | null;
+  src?: string | null;
+  tiny?: boolean;
+}) {
+  const [failed, setFailed] = useState<string>();
+  return (
+    <div className={`user-avatar${tiny ? " tiny" : ""}`}>
+      {src && failed !== src ? (
+        <Image
+          src={src}
+          alt=""
+          width={32}
+          height={32}
+          unoptimized
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(src)}
+        />
+      ) : (
+        name?.slice(0, tiny ? 1 : 2).toUpperCase() || "BH"
+      )}
+    </div>
   );
 }

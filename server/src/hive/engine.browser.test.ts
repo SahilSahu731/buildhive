@@ -1,4 +1,12 @@
-import { beforeAll, afterAll, describe, it, expect as check } from "vitest";
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  afterEach,
+  describe,
+  it,
+  expect as check,
+} from "vitest";
 import { chromium, Browser, Page } from "@playwright/test";
 import { executeStep } from "./runner.js";
 const browserTests =
@@ -10,8 +18,11 @@ browserTests("deterministic Chromium interpreter", () => {
     browser = await chromium.launch({
       channel: process.env.PLAYWRIGHT_CHANNEL || undefined,
     });
+  });
+  beforeEach(async () => {
     page = await browser.newPage();
-    page.setDefaultTimeout(500);
+    // Real Chromium needs scheduling headroom when fixture suites run together.
+    page.setDefaultTimeout(3000);
     await page.route("https://fixture.example/**", (route) =>
       route.fulfill({
         contentType: "text/html",
@@ -19,6 +30,9 @@ browserTests("deterministic Chromium interpreter", () => {
       }),
     );
     await page.goto("https://fixture.example/login");
+  });
+  afterEach(async () => {
+    await page?.close();
   });
   afterAll(async () => {
     await browser?.close();
@@ -30,7 +44,7 @@ browserTests("deterministic Chromium interpreter", () => {
       { action: "fill", locator: "label=Email", secret: "TEST_EMAIL" },
       "https://fixture.example",
       secrets,
-      500,
+      3000,
     );
     check(await page.getByLabel("Email").inputValue()).toBe("qa@example.com");
     await executeStep(
@@ -38,31 +52,36 @@ browserTests("deterministic Chromium interpreter", () => {
       { action: "select", locator: "label=Country", value: "IN" },
       "https://fixture.example",
       {},
-      500,
+      3000,
     );
     await executeStep(
       page,
       { action: "check", locator: "label=Agree" },
       "https://fixture.example",
       {},
-      500,
+      3000,
     );
     await executeStep(
       page,
       { action: "press", locator: "label=Email", value: "Tab" },
       "https://fixture.example",
       {},
-      500,
+      3000,
     );
     await executeStep(
       page,
       { action: "click", locator: "role=button|Sign in" },
       "https://fixture.example",
       {},
-      500,
+      3000,
     );
+    check(await page.getByLabel("Agree").isChecked()).toBe(true);
+    check(await page.locator("h1").textContent()).toBe("Dashboard");
   });
   it("passes the supported meaningful assertions against actual DOM state", async () => {
+    // Each assertion fixture owns its state; failures in other tests cannot cascade.
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.getByLabel("Agree").check();
     for (const step of [
       { action: "assertVisible", locator: "role=heading|Dashboard" },
       { action: "assertText", locator: "h1", value: "Dashboard" },
@@ -77,7 +96,7 @@ browserTests("deterministic Chromium interpreter", () => {
         step as Parameters<typeof executeStep>[1],
         "https://fixture.example",
         {},
-        500,
+        3000,
       );
   });
   it("fails a broken assertion instead of inventing success", async () => {

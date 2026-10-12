@@ -79,7 +79,10 @@ await context.addCookies([
 const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
-page.on("response", (response) => { if (response.status() >= 500 && response.url().includes("/api/")) errors.push(`API ${response.status()} ${new URL(response.url()).pathname}`); });
+page.on("response", (response) => {
+  if (response.status() >= 500 && response.url().includes("/api/"))
+    errors.push(`API ${response.status()} ${new URL(response.url()).pathname}`);
+});
 await mkdir("artifacts/qa", { recursive: true });
 async function screenshot(name) {
   await page.screenshot({ path: `artifacts/qa/${name}.png`, fullPage: true });
@@ -92,9 +95,7 @@ try {
   await screenshot("dashboard-empty");
   await page.getByRole("link", { name: "New project", exact: true }).click();
   await page.getByLabel("Project name", { exact: true }).fill("Acme Dashboard");
-  await page
-    .getByLabel("Website URL")
-    .fill("https://example.com");
+  await page.getByLabel("Website URL").fill("https://example.com");
   await page.getByRole("checkbox").check();
   await page
     .getByRole("button", { name: "Create project", exact: true })
@@ -171,10 +172,58 @@ try {
       networkErrors: ["401 https://example.com/api/login"],
     },
   });
+  // Synthetic image and prior pass exercise preview/compare UI without a cloud credential.
+  const evidenceImage = (await page.screenshot()).toString("base64");
+  const prior = await db.hiveRun.create({
+    data: {
+      projectId: project.id,
+      testId: test.id,
+      versionId: run.versionId,
+      targetUrl: project.url,
+      testName: test.name,
+      environment: project.environment,
+      status: "passed",
+      createdAt: new Date(run.createdAt.getTime() - 60000),
+      durationMs: 1240,
+      steps: {
+        create: { position: 0, action: "assertVisible", status: "passed" },
+      },
+    },
+  });
+  await db.hiveArtifact.createMany({
+    data: [run, prior].map((item) => ({
+      runId: item.id,
+      kind: "screenshot",
+      path: `ui-fixture/${item.id}.png`,
+      size: 100,
+      expiresAt: new Date(Date.now() + 3600000),
+    })),
+  });
+  await page.route("**/api/artifacts/*?preview=1", (route) =>
+    route.fulfill({ json: { url: `data:image/png;base64,${evidenceImage}` } }),
+  );
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Execution timeline" }),
   ).toBeVisible();
+  await page
+    .getByRole("button", { name: "View screenshot", exact: true })
+    .first()
+    .click();
+  await expect(page.locator(".screenshot-preview img")).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "View screenshot", exact: true })
+    .click();
+  await expect(page.locator(".screenshot-preview img")).toHaveCount(2);
+  await expect
+    .poll(() =>
+      page
+        .locator(".screenshot-preview img")
+        .evaluateAll((images) =>
+          images.every((image) => image.complete && image.naturalWidth > 0),
+        ),
+    )
+    .toBe(true);
   await screenshot("run-report");
   await page.goto(
     `http://127.0.0.1:3101/dashboard/projects/${project.id}/monitoring`,
@@ -182,7 +231,9 @@ try {
   await page.getByLabel("Monitoring enabled").check();
   await page.getByLabel("Timezone", { exact: true }).fill("Asia/Kolkata");
   await page.getByRole("button", { name: "Save schedule" }).click();
-  await expect(page.locator(".notice[role=alert]")).toContainText("Schedule saved.");
+  await expect(page.locator(".notice[role=alert]")).toContainText(
+    "Schedule saved.",
+  );
   await page.goto("http://127.0.0.1:3101/dashboard");
   await expect(
     page.getByRole("heading", { name: "Welcome back, Alex." }),
@@ -208,6 +259,24 @@ try {
     await expect(page.locator("#main-content")).toBeVisible();
     await expect(page.getByText("Loading your workspace…")).toHaveCount(0);
   }
+  await page.goto("http://127.0.0.1:3101/dashboard/settings/feedback");
+  await page.getByLabel("Subject", { exact: true }).fill("UI fixture feedback");
+  await page
+    .getByLabel("Details", { exact: true })
+    .fill("This is a synthetic UI acceptance message.");
+  await page.getByRole("button", { name: "Send feedback" }).click();
+  await expect(page.locator(".notice[role=alert]")).toContainText(
+    "your feedback has been recorded",
+  );
+  await page.goto("http://127.0.0.1:3101/dashboard/admin/feedback");
+  await expect(
+    page.getByText("UI fixture feedback", { exact: true }),
+  ).toBeVisible();
+  await page.goto(`http://127.0.0.1:3101/dashboard/projects/${project.id}`);
+  await expect(page.getByText("Test pass rate", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Frequently failing tests" }),
+  ).toBeVisible();
   await page.goto("http://127.0.0.1:3101/dashboard/settings/profile");
   await page.getByLabel("Display name").fill("Alex Tester");
   await page.getByRole("button", { name: "Save profile" }).click();
@@ -246,6 +315,7 @@ try {
     "/pricing",
     "/docs",
     "/faq",
+    "/changelog",
     "/privacy",
     "/terms",
     "/contact",
@@ -255,12 +325,46 @@ try {
     const response = await page.goto(`http://127.0.0.1:3101${path}`);
     expect(response.status()).toBe(200);
   }
+  await page.goto("http://127.0.0.1:3101/login?error=database");
+  await expect(page.getByRole("alert")).toContainText(
+    "Account storage is temporarily unavailable",
+  );
+  await screenshot("login-error-desktop");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await screenshot("login-error-mobile");
+  if (
+    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
+  )
+    throw new Error("Login horizontal overflow");
+  // Exercise actual click navigation without sending a browser to real providers.
+  for (const provider of ["google", "github"]) {
+    await page.route(`**/api/auth/${provider}`, (route) =>
+      route.fulfill({
+        status: 302,
+        headers: { location: "/login?error=denied" },
+        body: "",
+      }),
+    );
+    await page
+      .getByRole("button", {
+        name:
+          provider === "google"
+            ? "Continue with Google"
+            : "Continue with GitHub",
+      })
+      .click();
+    await expect(page.getByRole("alert")).toContainText(
+      "Sign-in was cancelled",
+    );
+    await page.unroute(`**/api/auth/${provider}`);
+  }
   expect(errors).toEqual([]);
   console.log(
     "UI QA passed: project creation, encrypted variables, test editor, verification gate, queue/cancel, reports, schedules, profile, navigation, public pages, dark mode and mobile layouts.",
   );
 } finally {
   await browser.close();
+  await db.feedback.deleteMany({ where: { userId: user.id } });
   await db.user.delete({ where: { id: user.id } });
   await db.$disconnect();
   await new Promise((resolve) => server.close(resolve));
