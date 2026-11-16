@@ -69,6 +69,12 @@ export type WorkspaceData = {
   posts: Post[];
   connections: Connection[];
   conversations: Conversation[];
+  reactions?: {
+    kind: "like" | "upvote";
+    targetId: string;
+    actorId: string;
+    createdAt: string;
+  }[];
 };
 export type NewProject = Omit<
   Project,

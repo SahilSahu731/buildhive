@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import {
-  MapPin,
-  ChevronRight,
-  UserPlus,
-  Check,
-  Clock,
-} from "@/components/ui/icons";
+  PiMapPin as MapPin,
+  PiCaretRight as ChevronRight,
+  PiUserPlus as UserPlus,
+  PiCheck as Check,
+  PiClock as Clock,
+} from "react-icons/pi";
 import { useWorkspace } from "@/components/providers/workspace-provider";
 import { Avatar } from "./avatar";
 import { Modal } from "./modal";

@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Check, X } from "@/components/ui/icons";
+import { PiCheck as Check, PiX as X } from "react-icons/pi";
 import { makeDemoData, DEMO_USER_ID } from "@/lib/demo-data";
 import { applyDemoMutation } from "@/lib/demo-reducer";
 import { mutationSchema, workspaceSchema } from "@/lib/validation";
@@ -346,7 +346,7 @@ export function WorkspaceProvider({
       {children}
       <div
         data-ui={`toast ${toast ? "toast-visible" : ""}`}
-        className="flex items-center gap-2.5 fixed bottom-7 left-[calc(50%_+_120px)] [transform:translate(-50%,_20px)] opacity-0 pointer-events-none z-1000 bg-surface-raised text-ink border border-border-strong rounded-[10px] py-3.5 px-[15px] max-w-[calc(100vw_-_32px)] text-[14px] [box-shadow:0_10px_40px_var(--color-shadow-color)] [transition:opacity_0.2s,_transform_0.2s] [&[data-ui~=toast-visible]]:opacity-100 [&[data-ui~=toast-visible]]:pointer-events-auto [&[data-ui~=toast-visible]]:[transform:translate(-50%,_0)] [&_>_button]:flex [&_>_button]:items-center [&_>_button]:bg-transparent [&_>_button]:text-muted [&_>_button]:p-1 max-[760px]:left-[50%] max-[760px]:bottom-[85px] max-[760px]:text-[13px] max-[760px]:w-max max-[760px]:max-w-[calc(100vw_-_30px)]"
+        className="flex items-center gap-2.5 fixed bottom-7 left-1/2 transform-[translate(-50%,20px)] opacity-0 pointer-events-none z-1000 bg-surface-raised text-ink border border-border-strong rounded-[10px] py-3.5 px-3.75 max-w-[calc(100vw-32px)] text-[14px] [box-shadow:0_10px_40px_var(--color-shadow-color)] [transition:opacity_0.2s,transform_0.2s] data-[ui~=toast-visible]:opacity-100 data-[ui~=toast-visible]:pointer-events-auto data-[ui~=toast-visible]:transform-[translate(-50%,0)] [&_>_button]:flex [&_>_button]:items-center [&_>_button]:bg-transparent [&_>_button]:text-muted [&_>_button]:p-1 max-[760px]:left-[50%] max-[760px]:bottom-21.25 max-[760px]:text-[13px] max-[760px]:w-max max-[760px]:max-w-[calc(100vw-30px)]"
         role="status"
         aria-live="polite"
       >

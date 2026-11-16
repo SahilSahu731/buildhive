@@ -135,7 +135,7 @@ export function OtpInput({
         className="mt-4 text-[13px] leading-[1.7] text-muted"
       >
         Enter your code, then press{" "}
-        <kbd className="rounded-sm border border-border-strong px-[5px] py-0.5 font-sans text-[11px] text-text">
+        <kbd className="rounded-sm border border-border-strong px-1.25 py-0.5 font-sans text-[11px] text-text">
           Enter
         </kbd>{" "}
         to verify.

@@ -4,7 +4,7 @@ import Image from "next/image";
 export function AuthBackground() {
   return (
     <div
-      className='absolute inset-0 -z-1 pointer-events-none select-none overflow-hidden after:[content:""] after:absolute after:inset-0 after:[background:radial-gradient(_ellipse_24%_70%_at_50%_46%,_#000_8%,_#000b_48%,_transparent_100%_),_linear-gradient(180deg,_#0005,_transparent_22%,_transparent_70%,_#0004)] max-[900px]:after:[background:radial-gradient(_ellipse_35%_72%_at_50%_48%,_#000_10%,_#000c_58%,_transparent_100%_)] max-[600px]:after:[background:linear-gradient(_180deg,_#0003_0%,_#0004_12%,_#000c_35%,_#000f_58%_)]'
+      className='absolute inset-0 -z-1 pointer-events-none select-none overflow-hidden after:[content:""] after:absolute after:inset-0 after:[background:radial-gradient(ellipse_24%_70%_at_50%_46%,#000_8%,#000b_48%,transparent_100%),linear-gradient(180deg,#0005,transparent_22%,transparent_70%,#0004)] max-[900px]:after:[background:radial-gradient(ellipse_35%_72%_at_50%_48%,#000_10%,#000c_58%,transparent_100%)] max-[600px]:after:[background:linear-gradient(180deg,#0003_0%,#0004_12%,#000c_35%,#000f_58%)]'
       aria-hidden="true"
     >
       <Image
@@ -14,7 +14,7 @@ export function AuthBackground() {
         sizes="100vw"
         loading="eager"
         fetchPriority="high"
-        className="object-cover object-center [transform-origin:50%_50%] animate-[auth-material-drift_28s_ease-in-out_infinite_alternate] max-[900px]:object-[66%_center] max-[900px]:opacity-85 max-[600px]:object-[76%_top] max-[600px]:opacity-75 motion-reduce:animate-none motion-reduce:transform-none"
+        className="object-cover object-center origin-[50%_50%] animate-[auth-material-drift_28s_ease-in-out_infinite_alternate] max-[900px]:object-[66%_center] max-[900px]:opacity-85 max-[600px]:object-[76%_top] max-[600px]:opacity-75 motion-reduce:animate-none motion-reduce:transform-none"
       />
     </div>
   );

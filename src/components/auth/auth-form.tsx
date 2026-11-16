@@ -2,7 +2,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, LoaderCircle } from "@/components/ui/icons";
+import {
+  PiArrowLeft as ArrowLeft,
+  PiArrowRight as ArrowRight,
+  PiSpinnerGap as LoaderCircle,
+} from "react-icons/pi";
 import { SiGithub } from "react-icons/si";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
@@ -212,7 +216,7 @@ export function AuthForm({
             htmlFor="auth-email"
           >
             Email address
-            <div className="flex items-center gap-2.75 rounded-lg bg-surface px-4  focu">
+            <div className="flex items-center gap-2.75 rounded-lg bg-surface px-4">
               <MdEmail size={22} />
               <input
                 className="min-h-13 w-full min-w-0 bg-transparent py-3 text-ink outline-none placeholder:text-faint focus:outline-none"

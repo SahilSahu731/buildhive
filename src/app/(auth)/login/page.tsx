@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { Asterisk, ArrowLeft } from "@/components/ui/icons";
+import {
+  PiBracketsCurlyBold as Asterisk,
+  PiArrowLeft as ArrowLeft,
+} from "react-icons/pi";
 import { AuthForm } from "@/components/auth/auth-form";
 import { AuthBackground } from "@/components/auth/auth-background";
 import { supabaseConfigured } from "@/lib/env";

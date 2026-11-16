@@ -14,13 +14,13 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open http://localhost:3000. With no Supabase configuration, the app runs an explicitly labeled **local preview**. Sample builders, products, posts, conversations, and your changes are saved in this browser only. Reset it with the reset button beside “Demo workspace” at the bottom of the sidebar. Preview identities are never sent to Supabase.
+Open http://localhost:3000. With no Supabase configuration, the app runs an explicitly labeled **local preview**. Sample builders, products, posts, conversations, and your changes are saved in this browser only. Reset it with “Reset demo workspace” in the sidebar’s Settings panel. Preview identities are never sent to Supabase.
 
 To enable real accounts and durable data, follow [the setup guide](docs/setup.md), apply the migration, set the public Supabase URL/key, and restart Next.js. Provider secrets and the Resend SMTP password belong in Supabase, never browser code.
 
 ## Interface
 
-A minimal dark interface with pure black page backgrounds and subtle dark panels, soft white text, customizable brand accents, locally hosted Inter, and React Icons. Shared semantic color tokens cover forms, dialogs, navigation, selection states, and native browser controls. The feed uses a single column; project discovery uses compact rows. Authentication shares the same typography and centered form layout, with a decorative animated backdrop, six OTP inputs, paste/autofill support, and Enter-to-verify. Motion respects reduced-motion preferences.
+A minimal dark interface with pure black page backgrounds and subtle dark panels, soft white text, customizable brand accents, locally hosted Inter, and React Icons. Shared semantic color tokens cover forms, dialogs, navigation, selection states, and native browser controls. The sidebar collapses into an icon rail, reveals its expand control on logo hover or focus, remembers the preference across visits, and becomes a keyboard-accessible drawer on mobile. Active links use filled icons; Settings and the profile sit at the bottom. The feed uses a single column; project discovery uses compact rows. Authentication shares the same typography and centered form layout, with a decorative animated backdrop, six OTP inputs, paste/autofill support, and Enter-to-verify. Motion respects reduced-motion preferences.
 
 Styles live directly in each component’s Tailwind `className`, including responsive and interaction states. Edit shared colors and the Inter font in the `@theme` block of `src/app/globals.css`; that file also contains base browser defaults and animation keyframes. There are no separate component stylesheets or inline React styles. `data-ui` attributes used by Tailwind variants identify nested elements or conditional UI states. Avatar sizes use a typed map of literal utilities so every size is generated at build time.
 
