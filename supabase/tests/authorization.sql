@@ -1,0 +1,58 @@
+-- Disposable local database only. Every fixture and helper is rolled back.
+begin;
+create function private.test_assert(value boolean,description text) returns void language plpgsql set search_path='' as $$begin if value is distinct from true then raise exception 'Assertion failed: %',description;end if;end;$$;
+create function private.test_error(statement text,expected text) returns void language plpgsql set search_path='' as $$declare actual text;begin begin execute statement;exception when others then get stacked diagnostics actual=returned_sqlstate;end;if actual is distinct from expected then raise exception 'Expected %, got % for %',expected,coalesce(actual,'success'),statement;end if;end;$$;
+grant execute on function private.test_assert(boolean,text),private.test_error(text,text) to authenticated;
+insert into auth.users(id,email,raw_user_meta_data) values
+('00000000-0000-4000-8000-000000000001','rls-a@example.test','{"name":"Builder A"}'),
+('00000000-0000-4000-8000-000000000002','rls-b@example.test','{"name":"Builder B"}'),
+('00000000-0000-4000-8000-000000000003','rls-e@example.test','{"name":"Builder E"}');
+insert into public.projects(id,owner_id,name,tagline) values('10000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000001','Test','A little test project');
+insert into public.posts(id,author_id,content) values('20000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000001','Public test post');
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000001';
+update public.profiles set bio='Updated' where id=auth.uid();
+select private.test_assert((select bio='Updated' from public.profiles where id=auth.uid()),'own profile update');
+select private.test_error($q$update public.profiles set id='00000000-0000-4000-8000-000000000003' where id=auth.uid()$q$,'42501');
+select private.test_error($q$update public.projects set owner_id='00000000-0000-4000-8000-000000000002'$q$,'42501');
+select private.test_error($q$insert into public.posts(author_id,content) values('00000000-0000-4000-8000-000000000002','Forged')$q$,'42501');
+select private.test_error($q$update public.profiles set skills=array[repeat('x',61)] where id=auth.uid()$q$,'23514');
+select private.test_error($q$insert into public.connections(sender_id,recipient_id) values('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002')$q$,'42501');
+select private.test_error($q$select public.request_connection('00000000-0000-4000-8000-000000000001')$q$,'22023');
+select set_config('test.connection_id',(public.request_connection('00000000-0000-4000-8000-000000000002')).id::text,true);
+select private.test_assert((public.request_connection('00000000-0000-4000-8000-000000000002')).id=current_setting('test.connection_id')::uuid,'duplicate request idempotent');
+select private.test_error(format('select public.accept_connection(%L::uuid)',current_setting('test.connection_id')),'P0002');
+insert into public.bookmarks(post_id,user_id) values('20000000-0000-4000-8000-000000000001',auth.uid());
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000003';
+select private.test_assert((select count(*)=0 from public.connections),'private connections');
+select private.test_assert((select count(*)=0 from public.bookmarks),'private bookmarks');
+select private.test_error(format('select public.accept_connection(%L::uuid)',current_setting('test.connection_id')),'P0002');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000002';
+select set_config('test.conversation_id',public.accept_connection(current_setting('test.connection_id')::uuid)::text,true);
+select private.test_assert(public.accept_connection(current_setting('test.connection_id')::uuid)=current_setting('test.conversation_id')::uuid,'accept idempotent');
+select private.test_assert((select count(*)=1 from public.conversations),'one conversation');
+select private.test_assert((select count(*)=2 from public.conversation_members),'two members');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000001';
+insert into public.messages(conversation_id,sender_id,content) values(current_setting('test.conversation_id')::uuid,auth.uid(),'Hello');
+select private.test_error(format('insert into public.messages(conversation_id,sender_id,content) values(%L::uuid,%L::uuid,%L)',current_setting('test.conversation_id'),'00000000-0000-4000-8000-000000000002','Forged'),'42501');
+with changed as(update public.messages set read_at=now() returning id) select private.test_assert((select count(*)=0 from changed),'sender cannot mark own message read');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000002';
+with changed as(update public.messages set read_at=now() returning id) select private.test_assert((select count(*)=1 from changed),'recipient read receipt');
+select private.test_error($q$update public.messages set content='Changed'$q$,'42501');
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000003';
+select private.test_assert((select count(*)=0 from public.conversations),'private conversations');
+select private.test_assert((select count(*)=0 from public.conversation_members),'private members');
+select private.test_assert((select count(*)=0 from public.messages),'private messages');
+select private.test_error(format('insert into public.messages(conversation_id,sender_id,content) values(%L::uuid,%L::uuid,%L)',current_setting('test.conversation_id'),'00000000-0000-4000-8000-000000000003','Intrusion'),'42501');
+with changed as(update public.posts set content='Hijacked' where id='20000000-0000-4000-8000-000000000001' returning id) select private.test_assert((select count(*)=0 from changed),'other author update blocked');
+reset role;
+set local role authenticated;
+set local request.jwt.claim.sub='00000000-0000-4000-8000-000000000003';
+insert into public.posts(author_id,content) select auth.uid(),'Rate test '||n from generate_series(1,10) n;
+delete from public.posts where author_id=auth.uid();
+select private.test_error($q$insert into public.posts(author_id,content) values(auth.uid(),'Over limit after deletion')$q$,'P0001');
+reset role;
+set local role anon;
+select count(*) from public.posts;
+reset role;
+rollback;

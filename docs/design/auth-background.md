@@ -1,0 +1,11 @@
+# Auth background
+
+The auth page uses original AI-generated artwork, created with the built-in imagegen tool and saved in the repository as `public/artwork/auth-sculpture.webp`. It is a locally served, optimized WebP; no runtime image generation or external asset host is involved.
+
+Visual reference: the dark material folds and empty center of [Resend's auth page](https://resend.com/login). Resend's artwork is not included in this project. The generated composition uses brushed black titanium folds with a restrained copper edge to fit BuildWithMe's orange branding.
+
+The image is decorative and hidden from assistive technology. A center scrim protects form readability, a mobile crop keeps the artwork above the controls, and CSS provides a slow drift. Reduced-motion users receive a still background. The existing OTP component and authentication state are independent of the artwork.
+
+## Generation prompt
+
+Use case: stylized-concept. Asset type: production website authentication background, wide landscape 16:9. Create an original premium abstract 3D artwork for a minimal developer platform. Pure absolute black backdrop (#000000), with two monumental sculptural folds of matte black titanium / softly brushed black satin foil, one entering from the upper-right corner and another from the lower-left corner. Broad flowing curved planes with sharp elegantly folded edges, subtle dimensional self-shadowing, narrow soft silver studio edge highlights, extremely restrained warm copper-orange rim light on one folded edge. The folds feel architectural and tactile, subtly grainy, gallery quality, beautifully controlled cinematic lighting. Composition: artwork stays in the outer corners and edges; the central vertical 45% of the image must stay completely black and empty, providing ample uninterrupted space for a readable centered sign-in form. Upper-left also mostly empty for a small wordmark. Keep the image very dark overall, black on black, with just enough silver edge light to clearly reveal the large sculptural forms. No broad colored glow. This is only the background art, no webpage mockup, no UI, no typography, no logos, no letters, no watermark, no orbits, no dot grids, no stars, no icons.
