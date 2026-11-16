@@ -4,13 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
-  PiBell as Bell,
-  PiCheck as Check,
   PiCaretRight as ChevronRight,
   PiUserCircle as CircleUserRound,
   PiUserCircleFill as CircleUserRoundFill,
-  PiSignOut as LogOut,
-  PiList as Menu,
   PiMagnifyingGlass as Search,
   PiX as X,
   PiHouseSimple as Home,
@@ -30,6 +26,7 @@ import { ProfilePreview } from "@/components/ui/profile-preview";
 import type { Profile } from "@/lib/types";
 import { Sidebar } from "./sidebar";
 import { SettingsDialog } from "./settings-dialog";
+import { Topbar } from "./topbar";
 import { useSidebarPreference } from "./use-sidebar-preference";
 
 const mobileLinks = [
@@ -55,7 +52,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, toggleSidebar] = useSidebarPreference();
   const closeMenu = useCallback(() => setMenu(false), []);
   const [compose, setCompose] = useState(false);
-  const [notifications, setNotifications] = useState(false);
   const [settings, setSettings] = useState(false);
   const [search, setSearch] = useState(false);
   const [query, setQuery] = useState("");
@@ -139,59 +135,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         }}
       />
       <div className="ml-(--sidebar-width) min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-[760px]:ml-0 max-[760px]:pb-17.5">
-        <header className="h-19 py-0 px-10.5 bg-header [border-bottom:1px_solid_var(--color-border)] flex items-center justify-between gap-5 sticky top-0 z-30 [backdrop-filter:blur(12px)] max-[1200px]:py-0 max-[1200px]:px-7.5 max-[950px]:px-6.5 max-[760px]:h-16.5 max-[760px]:py-0 max-[760px]:px-3.75 max-[760px]:gap-2.5 max-[390px]:px-3">
-          <div className="flex items-center gap-3 [&_strong]:font-medium [&_strong]:text-[18px] [&_strong]:tracking-[-0.5px] max-[760px]:gap-2.5 max-[760px]:[&_strong]:text-[17px]">
-            <button
-              data-ui="icon-button mobile-menu"
-              className="hidden items-center justify-center w-10.5 h-10.5 p-2 rounded-lg bg-transparent text-muted hover:bg-surface-hover hover:text-ink max-[760px]:flex max-[760px]:w-10 max-[760px]:h-10"
-              aria-label="Open navigation"
-              aria-controls="workspace-sidebar"
-              aria-expanded={menu}
-              onClick={() => setMenu(true)}
-            >
-              <Menu size={24} />
-            </button>
-            <strong>{label}</strong>
-          </div>
-          <div className="flex items-center gap-2 *:data-[ui~=button]:ml-2.5 max-[760px]:gap-px max-[760px]:*:data-[ui~=button]:ml-1.25 max-[760px]:*:data-[ui~=button]:min-h-9 max-[760px]:*:data-[ui~=button]:py-1.75 max-[760px]:*:data-[ui~=button]:px-3 max-[760px]:*:data-[ui~=button]:text-[12px]">
-            <button
-              data-ui="icon-button"
-              className="inline-flex items-center justify-center w-10.5 h-10.5 p-2 rounded-lg bg-transparent text-muted hover:bg-surface-hover hover:text-ink max-[760px]:w-10 max-[760px]:h-10"
-              aria-label="Search builders and projects"
-              title="Search (Ctrl / ⌘ K)"
-              onClick={() => setSearch(true)}
-            >
-              <Search size={22} />
-            </button>
-            <button
-              data-ui="icon-button notification-button"
-              className="inline-flex items-center justify-center w-10.5 h-10.5 p-2 rounded-lg bg-transparent text-muted hover:bg-surface-hover hover:text-ink relative [&_>_i]:absolute [&_>_i]:right-2.25 [&_>_i]:top-2.25 [&_>_i]:w-1.5 [&_>_i]:h-1.5 [&_>_i]:bg-brand [&_>_i]:border [&_>_i]:rounded-full [&_>_i]:border-canvas max-[760px]:w-10 max-[760px]:h-10"
-              aria-label="Connection requests"
-              onClick={() => setNotifications(true)}
-            >
-              <Bell size={22} />
-              {requests.length > 0 && <i />}
-            </button>
-            {demo ? (
-              <Link
-                href="/login"
-                data-ui="button button-secondary button-small"
-                className="inline-flex items-center justify-center gap-2.25 min-h-9.5 py-2 px-3.5 border border-transparent rounded-lg text-[13px] font-medium leading-[1.4] whitespace-nowrap [transition:background_0.18s,color_0.18s,border-color_0.18s,transform_0.18s] bg-surface text-ink enabled:hover:bg-surface-hover enabled:hover:border-faint enabled:hover:transform-[translateY(-1px)] enabled:active:transform-[translateY(0)] motion-reduce:enabled:hover:transform-none"
-              >
-                Sign in
-              </Link>
-            ) : (
-              <button
-                data-ui="icon-button"
-                className="inline-flex items-center justify-center w-10.5 h-10.5 p-2 rounded-lg bg-transparent text-muted hover:bg-surface-hover hover:text-ink max-[760px]:w-10 max-[760px]:h-10"
-                aria-label="Sign out"
-                onClick={() => void signOut()}
-              >
-                <LogOut size={22} />
-              </button>
-            )}
-          </div>
-        </header>
+        <Topbar
+          label={label}
+          pathname={pathname}
+          menuOpen={menu}
+          onMenu={() => setMenu(true)}
+          onSearch={() => setSearch(true)}
+          onSettings={() => setSettings(true)}
+          onSignOut={() => void signOut()}
+          onCompose={() => setCompose(true)}
+        />
         <main
           id="main-content"
           className="max-w-280 my-0 mx-auto pt-8 px-11 pb-16 min-[1600px]:pt-10 max-[1200px]:pt-7 max-[1200px]:px-8 max-[1200px]:pb-13.75 max-[950px]:px-6.5 max-[760px]:pt-5 max-[760px]:px-5 max-[760px]:pb-8.75 max-[760px]:max-w-190 max-[390px]:px-4"
@@ -264,42 +217,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         title="Create a post"
       >
         <Composer expanded onDone={() => setCompose(false)} />
-      </Modal>
-      <Modal
-        open={notifications}
-        onClose={() => setNotifications(false)}
-        title="Connection requests"
-      >
-        <div className="[&_>_a]:flex [&_>_a]:items-center [&_>_a]:gap-3 [&_>_a]:py-4.25 [&_>_a]:px-0 [&_>_a]:text-[15px] [&_>_a]:leading-[1.6] [&_>_a]:[border-bottom:1px_solid_var(--color-border)] [&_>_a_>_span:nth-child(2)]:flex-1 [&_strong]:font-medium [&_small]:block [&_small]:text-[13px] [&_small]:text-muted">
-          {requests.length ? (
-            requests.map((c) => {
-              const sender = data.profiles.find((p) => p.id === c.senderId);
-              return (
-                <Link
-                  href="/cofounders"
-                  key={c.id}
-                  onClick={() => setNotifications(false)}
-                >
-                  <Avatar profile={sender} size={44} />
-                  <span>
-                    <strong>{sender?.name || "A builder"}</strong> wants to
-                    connect.<small>View their profile and respond.</small>
-                  </span>
-                  <ChevronRight size={20} />
-                </Link>
-              );
-            })
-          ) : (
-            <div
-              data-ui="empty-state compact"
-              className="flex flex-col items-center text-center py-13.75 px-7 text-muted [&_h3]:text-ink [&_h3]:text-[21px] [&_h3]:font-medium [&_h3]:mt-4.25 [&_h3]:mx-0 [&_h3]:mb-2.25 [&_h2]:text-ink [&_h2]:text-[21px] [&_h2]:font-medium [&_h2]:mt-4.25 [&_h2]:mx-0 [&_h2]:mb-2.25 [&_p]:text-muted [&_p]:text-[15px] [&_p]:leading-[1.7] [&_p]:max-w-90 [&_p]:mt-0 [&_p]:mx-0 [&_p]:mb-5.5 data-[ui~=compact]:py-6.25 data-[ui~=compact]:px-2.5"
-            >
-              <Check size={28} />
-              <h3>You're all caught up.</h3>
-              <p>New connection requests will appear here.</p>
-            </div>
-          )}
-        </div>
       </Modal>
       <Modal
         open={search}

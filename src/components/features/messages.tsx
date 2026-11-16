@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   PiArrowLeft as ArrowLeft,
   PiArrowRight as ArrowRight,
@@ -12,9 +13,11 @@ import { useWorkspace } from "@/components/providers/workspace-provider";
 import { Avatar } from "@/components/ui/avatar";
 import { relativeTime } from "@/lib/utils";
 export function Messages() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const requestedConversation = searchParams.get("conversation");
   const { data, me, sendMessage } = useWorkspace();
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string>();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [mobile, setMobile] = useState(false);
@@ -27,10 +30,17 @@ export function Messages() {
       ),
     );
   const selected =
-    conversations.find((c) => c.id === selectedId) || conversations[0];
+    conversations.find((c) => c.id === requestedConversation) ||
+    conversations[0];
   const peer = data.profiles.find(
     (p) => p.id === selected?.memberIds.find((id) => id !== me.id),
   );
+  useEffect(() => {
+    if (requestedConversation) {
+      setMobile(true);
+      setDraft("");
+    }
+  }, [requestedConversation]);
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "nearest" });
   }, [selected?.id, selected?.messages.length]);
@@ -104,7 +114,10 @@ export function Messages() {
                     className="flex items-center gap-2.75 bg-transparent text-left w-full py-4.5 px-4.25 [border-left:2px_solid_transparent] hover:bg-surface-hover data-[ui~=selected]:bg-surface-hover data-[ui~=selected]:border-l-brand [&_>_span:nth-child(2)]:flex-1 [&_>_span:nth-child(2)]:min-w-0 [&_strong]:flex [&_strong]:items-center [&_strong]:justify-between [&_strong]:gap-1.25 [&_strong]:text-[14px] [&_strong]:font-medium [&_strong]:whitespace-nowrap [&_strong_small]:text-[11px] [&_strong_small]:text-muted [&_strong_small]:font-normal [&_p]:overflow-hidden [&_p]:text-ellipsis [&_p]:whitespace-nowrap [&_p]:text-muted [&_p]:text-[13px] [&_p]:leading-[1.6] [&_p]:mt-1.25 [&_p]:mx-0 [&_p]:mb-0 max-[1200px]:py-4.25 max-[1200px]:px-3 max-[1200px]:gap-2.25 max-[1200px]:[&_strong]:text-[14px] max-[1200px]:[&_strong_small]:text-[11px] max-[1000px]:[&_strong]:flex-wrap max-[1000px]:[&_strong]:text-[14px] max-[760px]:py-4.5 max-[760px]:px-5 max-[760px]:gap-3 max-[760px]:[&_strong]:text-[14px] max-[760px]:[&_strong]:flex-nowrap max-[760px]:[&_strong_small]:text-[11px] max-[760px]:[&_p]:text-[13px]"
                     key={c.id}
                     onClick={() => {
-                      setSelectedId(c.id);
+                      router.replace(
+                        `/messages?conversation=${encodeURIComponent(c.id)}`,
+                        { scroll: false },
+                      );
                       setDraft("");
                       setMobile(true);
                     }}

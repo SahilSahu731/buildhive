@@ -50,6 +50,7 @@ export type Connection = {
   recipientId: string;
   status: "pending" | "accepted" | "declined";
   createdAt: string;
+  updatedAt?: string;
 };
 export type Message = {
   id: string;

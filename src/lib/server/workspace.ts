@@ -128,14 +128,20 @@ export async function getWorkspace(
       .limit(50)
       .order("created_at", { referencedTable: "messages", ascending: false })
       .limit(100, { referencedTable: "messages" }),
-    client.from("post_likes")
+    client
+      .from("post_likes")
       .select("post_id,user_id,created_at,posts!inner(author_id)")
-      .eq("posts.author_id", userId).neq("user_id", userId)
-      .order("created_at", { ascending: false }).limit(50),
-    client.from("project_upvotes")
+      .eq("posts.author_id", userId)
+      .neq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    client
+      .from("project_upvotes")
       .select("project_id,user_id,created_at,projects!inner(owner_id)")
-      .eq("projects.owner_id", userId).neq("user_id", userId)
-      .order("created_at", { ascending: false }).limit(50),
+      .eq("projects.owner_id", userId)
+      .neq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
   for (const result of results)
     if (result.error)
@@ -156,11 +162,29 @@ export async function getWorkspace(
     receivedVotes,
   ] = results;
   const reactions = [
-    ...(receivedLikes.data as unknown as {post_id: string; user_id: string; created_at: string}[]).map(row => ({
-      kind: "like" as const, targetId: row.post_id, actorId: row.user_id, createdAt: row.created_at,
+    ...(
+      receivedLikes.data as unknown as {
+        post_id: string;
+        user_id: string;
+        created_at: string;
+      }[]
+    ).map((row) => ({
+      kind: "like" as const,
+      targetId: row.post_id,
+      actorId: row.user_id,
+      createdAt: row.created_at,
     })),
-    ...(receivedVotes.data as unknown as {project_id: string; user_id: string; created_at: string}[]).map(row => ({
-      kind: "upvote" as const, targetId: row.project_id, actorId: row.user_id, createdAt: row.created_at,
+    ...(
+      receivedVotes.data as unknown as {
+        project_id: string;
+        user_id: string;
+        created_at: string;
+      }[]
+    ).map((row) => ({
+      kind: "upvote" as const,
+      targetId: row.project_id,
+      actorId: row.user_id,
+      createdAt: row.created_at,
     })),
   ];
   const posts = postsResult.data as unknown as PostRow[];
@@ -176,7 +200,7 @@ export async function getWorkspace(
   }
   // The public directory is bounded, so fetch referenced peers/authors missing from it.
   const peerIds = new Set<string>();
-  reactions.forEach(reaction => peerIds.add(reaction.actorId));
+  reactions.forEach((reaction) => peerIds.add(reaction.actorId));
   const conversationRows =
     conversationsResult.data as unknown as ConversationRow[];
   conversationRows.forEach((c) =>
@@ -189,6 +213,7 @@ export async function getWorkspace(
     recipient_id: string;
     status: "pending" | "accepted" | "declined";
     created_at: string;
+    updated_at: string;
   }[];
   connectionRows.forEach((c) => {
     peerIds.add(c.sender_id);
@@ -264,6 +289,7 @@ export async function getWorkspace(
       recipientId: c.recipient_id,
       status: c.status,
       createdAt: c.created_at,
+      updatedAt: c.updated_at,
     })),
     conversations: conversationRows.map((c) => ({
       id: c.id,

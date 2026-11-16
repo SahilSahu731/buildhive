@@ -78,12 +78,17 @@ const storedComment = z.object({
   createdAt: z.iso.datetime(),
 });
 export const workspaceSchema = z.object({
-  reactions: z.array(z.object({
-    kind: z.enum(["like", "upvote"]),
-    targetId: id,
-    actorId: id,
-    createdAt: z.iso.datetime(),
-  })).max(200).optional(),
+  reactions: z
+    .array(
+      z.object({
+        kind: z.enum(["like", "upvote"]),
+        targetId: id,
+        actorId: id,
+        createdAt: z.iso.datetime(),
+      }),
+    )
+    .max(200)
+    .optional(),
   profiles: z.array(storedProfile).max(500),
   projects: z.array(storedProject).max(500),
   posts: z
@@ -110,6 +115,7 @@ export const workspaceSchema = z.object({
         recipientId: id,
         status: z.enum(["pending", "accepted", "declined"]),
         createdAt: z.iso.datetime(),
+        updatedAt: z.iso.datetime().optional(),
       }),
     )
     .max(500),
@@ -136,6 +142,14 @@ export const workspaceSchema = z.object({
 
 export const feedbackSchema = z.object({
   category: z.enum(["idea", "bug", "other"]),
-  message: z.string().trim().min(10, "Please include at least 10 characters.").max(3000),
-  path: z.string().max(500).startsWith("/").refine(value => !value.startsWith("//")),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Please include at least 10 characters.")
+    .max(3000),
+  path: z
+    .string()
+    .max(500)
+    .startsWith("/")
+    .refine((value) => !value.startsWith("//")),
 });

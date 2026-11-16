@@ -85,6 +85,10 @@ The application callback performs the PKCE code exchange and accepts only same-o
 
 ## Launch checks
 
+The topbar's feedback form requires `supabase/migrations/202611160002_feedback.sql` after the initial migration. Apply it with your normal Supabase migration workflow. Reports are private and can be reviewed in the dashboard's `public.feedback` table; signed-in users have insert-only access, and the existing per-user write limiter applies. Preview users are prompted to sign in before sending. Feedback does not send an email.
+
+The notification dropdown combines messages, connection requests/acceptances, replies to your posts, and individual likes/upvotes on your work. It uses the workspace's bounded queries and polling, so it is recent activity rather than a permanent audit log. Marking notifications read saves that state per account on the current device; it does not mark conversation messages read or synchronize read state across devices.
+
 1. Run type checking, tests, production build, and the disposable-database authorization assertions.
 2. Test Google, GitHub, new-user email OTP, returning-user OTP, wrong/expired code, resend, sign-out, and session refresh against the actual project.
 3. Use two real accounts to test request/accept/message flows; use a third to verify message/bookmark isolation.

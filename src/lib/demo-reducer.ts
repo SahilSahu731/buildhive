@@ -162,7 +162,11 @@ export function applyDemoMutation(
         ...data,
         connections: data.connections.map((c) =>
           c.id === connection.id
-            ? { ...c, status: mutation.accept ? "accepted" : "declined" }
+            ? {
+                ...c,
+                status: mutation.accept ? "accepted" : "declined",
+                updatedAt: now,
+              }
             : c,
         ),
         conversations:
