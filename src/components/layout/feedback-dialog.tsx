@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import {
   PiLightbulb,
   PiBug,
@@ -17,12 +17,19 @@ export function FeedbackDialog({
   open,
   onClose,
   path,
+  intent = "feedback",
 }: {
   open: boolean;
   onClose: () => void;
   path: string;
+  intent?: "feedback" | "promotion";
 }) {
   const { demo, notify } = useWorkspace();
+  const messageId = useId();
+  const noteId = useId();
+  const promoting = intent === "promotion";
+  const prefix = promoting ? "Product promotion request\n\n" : "";
+  const messageLimit = 3000 - prefix.length;
   const [category, setCategory] = useState<"idea" | "bug" | "other">("idea");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -30,7 +37,11 @@ export function FeedbackDialog({
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (sending || demo) return;
-    const parsed = feedbackSchema.safeParse({ category, message, path });
+    const parsed = feedbackSchema.safeParse({
+      category: promoting ? "other" : category,
+      message: prefix + message,
+      path,
+    });
     if (!parsed.success) {
       setError(
         parsed.error.issues[0]?.message || "Please check your feedback.",
@@ -53,7 +64,11 @@ export function FeedbackDialog({
       }
       setMessage("");
       onClose();
-      notify("Thanks for helping make BuildWithMe better. Feedback received.");
+      notify(
+        promoting
+          ? "Your product promotion request has been received."
+          : "Thanks for helping make BuildWithMe better. Feedback received.",
+      );
     } catch (failure) {
       setError(
         failure instanceof Error
@@ -68,68 +83,80 @@ export function FeedbackDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title="Help shape BuildWithMe"
-      description="An idea, a rough edge, or something you love. We're listening."
+      title={promoting ? "Promote your product" : "Help shape BuildWithMe"}
+      description={
+        promoting
+          ? "Tell us about your product and the builders you want to reach. This is a placement request; no payment is taken."
+          : "An idea, a rough edge, or something you love. We're listening."
+      }
     >
       <form onSubmit={submit} className="space-y-5">
-        <fieldset disabled={sending} className="m-0 min-w-0 border-0 p-0">
-          <legend className="mb-2.5 text-xs text-muted">
-            What's on your mind?
-          </legend>
-          <div className="grid grid-cols-3 gap-2">
-            {(
-              [
-                ["idea", "Idea", PiLightbulb],
-                ["bug", "Issue", PiBug],
-                ["other", "Other", PiChatCircle],
-              ] as const
-            ).map(([value, label, Icon]) => (
-              <label key={value} className="cursor-pointer">
-                <input
-                  type="radio"
-                  name="feedback-category"
-                  value={value}
-                  checked={category === value}
-                  onChange={() => setCategory(value)}
-                  className="peer sr-only"
-                />
-                <span className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border text-sm text-muted transition-colors hover:bg-surface-hover peer-checked:border-ink/60 peer-checked:bg-surface-hover peer-checked:text-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand">
-                  <Icon size={18} />
-                  {label}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        {!promoting && (
+          <fieldset disabled={sending} className="m-0 min-w-0 border-0 p-0">
+            <legend className="mb-2.5 text-xs text-muted">
+              What's on your mind?
+            </legend>
+            <div className="grid grid-cols-3 gap-2">
+              {(
+                [
+                  ["idea", "Idea", PiLightbulb],
+                  ["bug", "Issue", PiBug],
+                  ["other", "Other", PiChatCircle],
+                ] as const
+              ).map(([value, label, Icon]) => (
+                <label key={value} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="feedback-category"
+                    value={value}
+                    checked={category === value}
+                    onChange={() => setCategory(value)}
+                    className="peer sr-only"
+                  />
+                  <span className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border text-sm text-muted transition-colors hover:bg-surface-hover peer-checked:border-ink/60 peer-checked:bg-surface-hover peer-checked:text-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand">
+                    <Icon size={18} />
+                    {label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
         <div>
           <label
-            htmlFor="feedback-message"
+            htmlFor={messageId}
             className="mb-2.5 block text-xs text-muted"
           >
-            Tell us a little more
+            {promoting
+              ? "Your product, link, and ideal audience"
+              : "Tell us a little more"}
           </label>
           <textarea
-            id="feedback-message"
+            id={messageId}
             required
             minLength={10}
-            maxLength={3000}
+            maxLength={messageLimit}
             value={message}
             disabled={sending}
             onChange={(event) => setMessage(event.target.value)}
-            aria-describedby="feedback-note"
+            aria-describedby={noteId}
             aria-invalid={!!error}
             placeholder={
-              category === "bug"
-                ? "What happened, and what did you expect?"
-                : "What would make building together better?"
+              promoting
+                ? "What are you building? Include a product link and who it's for."
+                : category === "bug"
+                  ? "What happened, and what did you expect?"
+                  : "What would make building together better?"
             }
             className="min-h-36 w-full resize-y rounded-xl border border-border bg-canvas p-4 text-sm leading-relaxed text-ink placeholder:text-muted/60"
           />
           <div className="mt-2 flex justify-between gap-3 text-[11px] text-muted">
-            <span id="feedback-note">
+            <span id={noteId}>
               The current page is included. Please leave out sensitive details.
             </span>
-            <span className="shrink-0">{message.length}/3000</span>
+            <span className="shrink-0">
+              {message.length}/{messageLimit}
+            </span>
           </div>
         </div>
         {error && (
@@ -141,7 +168,9 @@ export function FeedbackDialog({
           {demo ? (
             <>
               <span className="text-xs text-muted">
-                Sign in to send your feedback.
+                {promoting
+                  ? "Sign in to request a placement."
+                  : "Sign in to send your feedback."}
               </span>
               <Link
                 href="/login"
@@ -153,7 +182,9 @@ export function FeedbackDialog({
           ) : (
             <>
               <span className="text-xs text-muted">
-                Small details make a big difference.
+                {promoting
+                  ? "A little more visibility for what you're building."
+                  : "Small details make a big difference."}
               </span>
               <button
                 type="submit"
@@ -168,7 +199,11 @@ export function FeedbackDialog({
                 ) : (
                   <PiPaperPlaneTilt size={17} />
                 )}
-                {sending ? "Sending…" : "Send feedback"}
+                {sending
+                  ? "Sending…"
+                  : promoting
+                    ? "Send request"
+                    : "Send feedback"}
               </button>
             </>
           )}

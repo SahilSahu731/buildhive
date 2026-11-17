@@ -27,6 +27,7 @@ import type { Profile } from "@/lib/types";
 import { Sidebar } from "./sidebar";
 import { SettingsDialog } from "./settings-dialog";
 import { Topbar } from "./topbar";
+import { DiscoverySidebar } from "./discovery-sidebar";
 import { useSidebarPreference } from "./use-sidebar-preference";
 
 const mobileLinks = [
@@ -71,6 +72,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     (c) => c.recipientId === me.id && c.status === "pending",
   );
   const label = pageLabels[pathname] || "Profile";
+  const showDiscovery = pathname === "/" || pathname === "/bookmarks";
   const profiles = data.profiles
     .filter(
       (p) =>
@@ -134,39 +136,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           closeMenu();
         }}
       />
-      <div className="ml-(--sidebar-width) min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-[760px]:ml-0 max-[760px]:pb-17.5">
+      <div className="@container ml-(--sidebar-width) min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none max-[760px]:ml-0 max-[760px]:pb-17.5">
         <Topbar
           label={label}
           pathname={pathname}
           menuOpen={menu}
           onMenu={() => setMenu(true)}
           onSearch={() => setSearch(true)}
-          onSettings={() => setSettings(true)}
-          onSignOut={() => void signOut()}
           onCompose={() => setCompose(true)}
         />
         <main
           id="main-content"
-          className="max-w-280 my-0 mx-auto pt-8 px-11 pb-16 min-[1600px]:pt-10 max-[1200px]:pt-7 max-[1200px]:px-8 max-[1200px]:pb-13.75 max-[950px]:px-6.5 max-[760px]:pt-5 max-[760px]:px-5 max-[760px]:pb-8.75 max-[760px]:max-w-190 max-[390px]:px-4"
+          className={
+            showDiscovery
+              ? "mx-auto grid max-w-300 grid-cols-1 gap-8 px-8 pb-16 pt-8 @min-[980px]:grid-cols-[minmax(0,1fr)_300px] max-[950px]:px-6.5 max-[760px]:px-5 max-[760px]:pb-8.75 max-[760px]:pt-5 max-[390px]:px-4"
+              : "max-w-280 my-0 mx-auto pt-8 px-11 pb-16 min-[1600px]:pt-10 max-[1200px]:pt-7 max-[1200px]:px-8 max-[1200px]:pb-13.75 max-[950px]:px-6.5 max-[760px]:pt-5 max-[760px]:px-5 max-[760px]:pb-8.75 max-[760px]:max-w-190 max-[390px]:px-4"
+          }
         >
-          {error && (
-            <div
-              role="alert"
-              className="flex items-center justify-between gap-3.75 border bg-brand-soft text-brand-text rounded-lg py-3 px-4 text-[14px] mb-6 border-brand-border [&_button]:py-1 [&_button]:px-0 [&_button]:bg-transparent [&_button]:text-inherit [&_button]:underline [&_button]:whitespace-nowrap max-[760px]:text-[13px]"
-            >
-              <span>{error}</span>
-              <button onClick={() => void refresh()}>Try again</button>
-            </div>
-          )}
-          {loading && (
-            <div
-              className="fixed right-5 bottom-4 text-[12px] text-muted z-20 max-[760px]:bottom-19 max-[760px]:text-[11px]"
-              role="status"
-            >
-              Loading workspace…
-            </div>
-          )}
-          {children}
+          <div className="min-w-0">
+            {error && (
+              <div
+                role="alert"
+                className="flex items-center justify-between gap-3.75 border bg-brand-soft text-brand-text rounded-lg py-3 px-4 text-[14px] mb-6 border-brand-border [&_button]:py-1 [&_button]:px-0 [&_button]:bg-transparent [&_button]:text-inherit [&_button]:underline [&_button]:whitespace-nowrap max-[760px]:text-[13px]"
+              >
+                <span>{error}</span>
+                <button onClick={() => void refresh()}>Try again</button>
+              </div>
+            )}
+            {loading && (
+              <div
+                className="fixed right-5 bottom-4 text-[12px] text-muted z-20 max-[760px]:bottom-19 max-[760px]:text-[11px]"
+                role="status"
+              >
+                Loading workspace…
+              </div>
+            )}
+            {children}
+          </div>
+          {showDiscovery && <DiscoverySidebar pathname={pathname} />}
         </main>
         <nav
           className="hidden max-[760px]:flex max-[760px]:justify-around max-[760px]:items-center max-[760px]:fixed max-[760px]:bottom-0 max-[760px]:left-0 max-[760px]:right-0 max-[760px]:z-40 max-[760px]:h-17 max-[760px]:pt-2 max-[760px]:px-2.5 max-[760px]:pb-[max(8px,env(safe-area-inset-bottom))] max-[760px]:bg-header max-[760px]:[border-top:1px_solid_var(--color-border)] max-[760px]:[backdrop-filter:blur(12px)] max-[760px]:[&_>_a]:flex max-[760px]:[&_>_a]:items-center max-[760px]:[&_>_a]:flex-col max-[760px]:[&_>_a]:gap-1 max-[760px]:[&_>_a]:min-w-11.25 max-[760px]:[&_>_a]:text-muted max-[760px]:[&_>_a]:text-[10px] max-[760px]:[&_>_a[data-ui~=active]]:text-brand-text"

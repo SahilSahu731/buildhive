@@ -7,19 +7,12 @@ import {
   PiMagnifyingGlass,
   PiChatTeardropText,
   PiQuestion,
-  PiCaretDown,
-  PiUserCircle,
-  PiGearSix,
-  PiSignOut,
-  PiKeyboard,
   PiPlus,
   PiUsers,
   PiSquaresFour,
 } from "react-icons/pi";
 import { useWorkspace } from "@/components/providers/workspace-provider";
-import { Avatar } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
-import { Popover } from "@/components/ui/popover";
 import { NotificationCenter } from "./notification-center";
 import { FeedbackDialog } from "./feedback-dialog";
 
@@ -29,8 +22,6 @@ export function Topbar({
   menuOpen,
   onMenu,
   onSearch,
-  onSettings,
-  onSignOut,
   onCompose,
 }: {
   label: string;
@@ -38,16 +29,17 @@ export function Topbar({
   menuOpen: boolean;
   onMenu: () => void;
   onSearch: () => void;
-  onSettings: () => void;
-  onSignOut: () => void;
   onCompose: () => void;
 }) {
-  const { me, demo } = useWorkspace();
+  const { demo, loading } = useWorkspace();
   const [feedback, setFeedback] = useState(false);
   const [help, setHelp] = useState(false);
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-15 items-center justify-between gap-4 border-b border-border bg-header px-10.5 backdrop-blur-xl max-[1200px]:px-7.5 max-[950px]:px-6.5 max-[760px]:h-15 max-[760px]:gap-2 max-[760px]:px-4 max-[390px]:px-3">
+      <header
+        aria-label={`${label} tools`}
+        className="sticky top-0 z-30 flex h-15 items-center justify-between gap-4 border-b border-border bg-header px-10.5 backdrop-blur-xl max-[1200px]:px-7.5 max-[950px]:px-6.5 max-[760px]:h-15 max-[760px]:gap-2 max-[760px]:px-4 max-[390px]:px-3"
+      >
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -59,9 +51,6 @@ export function Topbar({
           >
             <PiList size={23} />
           </button>
-          {/* <strong className="truncate text-[17px] font-medium tracking-tight">
-            {label}
-          </strong> */}
         </div>
         <div className="flex shrink-0 items-center gap-1.5 max-[760px]:gap-0.5">
           <button
@@ -99,87 +88,14 @@ export function Topbar({
             className="mx-2 h-5 w-px bg-border max-[760px]:hidden"
           />
           <NotificationCenter />
-          <Popover
-            label="Account menu"
-            trigger={
-              <>
-                <Avatar profile={me} size={27} />
-                <PiCaretDown size={12} className="mr-1 max-[760px]:hidden" />
-              </>
-            }
-          >
-            {(close) => (
-              <div className="p-2 [&_button]:flex [&_button]:min-h-10 [&_button]:w-full [&_button]:items-center [&_button]:gap-3 [&_button]:rounded-xl [&_button]:bg-transparent [&_button]:px-3 [&_button]:text-left [&_button]:text-sm [&_button]:text-muted [&_button:hover]:bg-surface-hover [&_button:hover]:text-ink">
-                <div className="mb-1 border-b border-border px-3 pb-4 pt-3">
-                  <p className="mb-0 truncate text-sm font-medium">{me.name}</p>
-                  <span className="mt-1 block text-xs text-muted">
-                    {demo ? "Exploring the preview" : `@${me.username}`}
-                  </span>
-                </div>
-                <Link
-                  href="/profile"
-                  onClick={close}
-                  className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-muted hover:bg-surface-hover hover:text-ink"
-                >
-                  <PiUserCircle size={19} />
-                  Your profile
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    close();
-                    onSettings();
-                  }}
-                >
-                  <PiGearSix size={19} />
-                  Settings
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    close();
-                    setFeedback(true);
-                  }}
-                >
-                  <PiChatTeardropText size={19} />
-                  Send feedback
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    close();
-                    setHelp(true);
-                  }}
-                >
-                  <PiKeyboard size={19} />
-                  Help & shortcuts
-                </button>
-                <div className="mt-1 border-t border-border pt-1">
-                  {demo ? (
-                    <Link
-                      href="/login"
-                      onClick={close}
-                      className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm hover:bg-surface-hover"
-                    >
-                      <PiSignOut size={19} />
-                      Sign in
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        close();
-                        onSignOut();
-                      }}
-                    >
-                      <PiSignOut size={19} />
-                      Sign out
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </Popover>
+          {!loading && demo && (
+            <Link
+              href="/login"
+              className="ml-2 inline-flex min-h-9.5 items-center justify-center rounded-full bg-primary px-4 text-sm font-medium text-primary-ink transition-colors hover:bg-primary-hover"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </header>
       <FeedbackDialog

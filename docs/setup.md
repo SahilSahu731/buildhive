@@ -87,6 +87,8 @@ The application callback performs the PKCE code exchange and accepts only same-o
 
 The topbar's feedback form requires `supabase/migrations/202611160002_feedback.sql` after the initial migration. Apply it with your normal Supabase migration workflow. Reports are private and can be reviewed in the dashboard's `public.feedback` table; signed-in users have insert-only access, and the existing per-user write limiter applies. Preview users are prompted to sign in before sending. Feedback does not send an email.
 
+The feed's promotion form uses the same private feedback endpoint and table, with category `other` and a `Product promotion request` prefix. It collects placement requests; it does not charge users or automatically create paid campaigns. Products in the discovery rail are ranked by their actual upvotes and are organic recommendations. Suggested builders are available people who have no existing connection/request with the current user.
+
 The notification dropdown combines messages, connection requests/acceptances, replies to your posts, and individual likes/upvotes on your work. It uses the workspace's bounded queries and polling, so it is recent activity rather than a permanent audit log. Marking notifications read saves that state per account on the current device; it does not mark conversation messages read or synchronize read state across devices.
 
 1. Run type checking, tests, production build, and the disposable-database authorization assertions.

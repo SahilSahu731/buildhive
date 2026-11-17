@@ -1,7 +1,6 @@
 import type { WorkspaceData } from "./types";
 
 export type Notification = {
-  read: any;
   id: string;
   kind: "connection" | "message" | "comment" | "like" | "upvote";
   actorId: string;

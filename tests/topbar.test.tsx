@@ -36,6 +36,7 @@ vi.mock("@/components/ui/modal", () => ({
 beforeEach(() => {
   localStorage.clear();
   workspace.demo = true;
+  workspace.loading = false;
   workspace.data = makeDemoData();
   vi.clearAllMocks();
 });
@@ -50,12 +51,32 @@ const props = {
   menuOpen: false,
   onMenu: vi.fn(),
   onSearch: vi.fn(),
-  onSettings: vi.fn(),
-  onSignOut: vi.fn(),
   onCompose: vi.fn(),
 };
 
 describe("topbar", () => {
+  it("shows only a sign-in link when signed out, with no account dropdown", () => {
+    const view = render(<Topbar {...props} />);
+    const header = screen.getByRole("banner");
+    expect(
+      within(header)
+        .getByRole("link", { name: "Sign in" })
+        .getAttribute("href"),
+    ).toBe("/login");
+    expect(
+      within(header).queryByRole("button", { name: "Account menu" }),
+    ).toBeNull();
+    workspace.demo = false;
+    view.rerender(<Topbar {...props} />);
+    expect(within(header).queryByRole("link", { name: "Sign in" })).toBeNull();
+    expect(
+      within(header).queryByRole("button", { name: "Account menu" }),
+    ).toBeNull();
+    workspace.demo = true;
+    workspace.loading = true;
+    view.rerender(<Topbar {...props} />);
+    expect(within(header).queryByRole("link", { name: "Sign in" })).toBeNull();
+  });
   it("opens notifications in place, supports unread filtering, and persists mark-all-read", async () => {
     const user = userEvent.setup();
     const view = render(<Topbar {...props} />);
@@ -168,7 +189,9 @@ describe("topbar", () => {
     await user.click(screen.getByRole("button", { name: "Feedback" }));
     expect(screen.queryByRole("button", { name: "Send feedback" })).toBeNull();
     expect(
-      screen.getByRole("link", { name: "Sign in" }).getAttribute("href"),
+      within(screen.getByRole("dialog", { name: "Help shape BuildWithMe" }))
+        .getByRole("link", { name: "Sign in" })
+        .getAttribute("href"),
     ).toBe("/login");
   });
 });
